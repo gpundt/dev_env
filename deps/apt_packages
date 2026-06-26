@@ -1,5 +1,6 @@
 zsh
 fonts-powerline
 dconf-cli
-eza
+exa
 tmux
+kitty

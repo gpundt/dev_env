@@ -1,4 +1,12 @@
-## COLORS ##
+#!/bin/bash
+# ──── Filepaths ────────────────────────────────────────────────────────────────────
+TMUX_CONF_SRC=$(pwd)/../configs/tmux.conf
+TMUX_CONG_DST=~/.tmux.conf
+
+KITTY_CONF_SRC=$(pwd)/../configs/kitty.conf
+KITTY_CONF_DST=~/.config/kitty/kitty.conf
+
+# ──── Colors ─────────────────────────────────────────────────────────────────────── 
 RED="\033[0;31m"
 GREEN="\033[0;32m"
 YELLOW="\033[0;33m"
@@ -6,6 +14,8 @@ BLUE="\033[0;34m"
 PURPLE="\033[0;35m"
 CYAN="\033[0;36m"
 RESET="\033[0m"
+
+# ──── Messages ─────────────────────────────────────────────────────────────────────
 function graceful_exit() {
     echo -e "${RED}*Closing*${RESET}"
     exit 1
@@ -29,4 +39,34 @@ function warning_message() {
 }
 function message() {
     echo -e "${PURPLE}$1${RESET}: $2"
+}
+
+# ──── Helper Functions ──────────────────────────────────────────────────────────────
+function _create_dir() {
+    if [ ! -d "$1" ]; then
+        start_step_message "$1" "substep"
+        if ! sudo mkdir -p "$1"; then
+            error_message "Failed to create directory '$1'"
+        fi
+    fi
+}
+
+function _copy_file() {
+    start_step_message "$1 -> $2" "substep"
+    if ! sudo cp -r $1 $2; then
+        error_message "Failed to move $1 to $2"
+    fi
+}
+
+# ──── Config File Placement ────────────────────────────────────────────────────────
+function _place_tmux_config() {
+    start_step_message "Placing Tmux Config: '${TMUX_CONFIG_SRC}' -> '${TMUX_CONG_DST}'"
+    _copy_file $TMUX_CONF_SRC $TMUX_CONG_DST
+    successful
+}
+
+function _place_kitty_config() {
+    start_step_message "Placing Kitty Config: '${KITTY_CONFIG_SRC}' -> '${KITTY_CONF_DST}'"
+    _copy_file $KITTY_CONF_SRC $KITTY_CONF_DST
+    successful
 }
