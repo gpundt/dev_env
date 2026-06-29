@@ -1,10 +1,13 @@
 #!/bin/bash
 # ──── Filepaths ────────────────────────────────────────────────────────────────────
 TMUX_CONF_SRC=$(pwd)/../configs/tmux.conf
-TMUX_CONG_DST=~/.tmux.conf
+TMUX_CONF_DST=~/.tmux.conf
 
 KITTY_CONF_SRC=$(pwd)/../configs/kitty.conf
 KITTY_CONF_DST=~/.config/kitty/kitty.conf
+
+ALACRITTY_CONFIG_SRC=$(pwd)/../configs/alacritty.toml
+ALACRITTY_CONF_DST=/.config/alacritty/alacritty.toml
 
 # ──── Colors ─────────────────────────────────────────────────────────────────────── 
 RED="\033[0;31m"
@@ -60,13 +63,20 @@ function _copy_file() {
 
 # ──── Config File Placement ────────────────────────────────────────────────────────
 function _place_tmux_config() {
-    start_step_message "Placing Tmux Config: '${TMUX_CONFIG_SRC}' -> '${TMUX_CONG_DST}'"
-    _copy_file $TMUX_CONF_SRC $TMUX_CONG_DST
+    start_step_message "Placing Tmux Config: '${TMUX_CONF_SRC}' -> '${TMUX_CONF_DST}'"
+    _copy_file $TMUX_CONF_SRC $TMUX_CONF_DST
     successful
 }
 
 function _place_kitty_config() {
-    start_step_message "Placing Kitty Config: '${KITTY_CONFIG_SRC}' -> '${KITTY_CONF_DST}'"
+    start_step_message "Placing Kitty Config: '${KITTY_CONF_SRC}' -> '${KITTY_CONF_DST}'"
+    mkdir -p ~/.config/kitty
     _copy_file $KITTY_CONF_SRC $KITTY_CONF_DST
+    successful
+}
+
+function _place_alacritty_config() {
+    start_step_message "Placing Alacritty Config: '${ALACRTTY_CONF_SRC}' -> '${ALACRITTY_CONF_DST}'"
+    _copy_file $ALACRTTY_CONF_SRC $ALACRITTY_CONF_DST
     successful
 }

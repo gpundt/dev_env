@@ -1,0 +1,8 @@
+deps/apt/*
+!deps/apt/apt.list
+
+deps/fonts/*
+!deps/fonts/apt.list
+
+deps/git/*
+!deps/git/git.list
