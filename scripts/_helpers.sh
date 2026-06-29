@@ -10,13 +10,13 @@ ALACRITTY_CONFIG_SRC=$(pwd)/../configs/alacritty.toml
 ALACRITTY_CONF_DST=/.config/alacritty/alacritty.toml
 
 # ──── Colors ─────────────────────────────────────────────────────────────────────── 
-RED="\033[0;31m"
-GREEN="\033[0;32m"
-YELLOW="\033[0;33m"
-BLUE="\033[0;34m"
-PURPLE="\033[0;35m"
-CYAN="\033[0;36m"
-RESET="\033[0m"
+RED=$'\033[1;31m'
+GREEN=$'\033[0;32m'
+YELLOW=$'\033[0;33m'
+BLUE=$'\033[0;34m'
+PURPLE=$'\033[0;35m'
+CYAN=$'\033[0;36m'
+RESET=$'\033[0m'
 
 # ──── Messages ─────────────────────────────────────────────────────────────────────
 function graceful_exit() {
@@ -34,14 +34,23 @@ function successful() {
     echo -e "\t - ${GREEN}*Successful*${RESET}"
 }
 function error_message() {
-    echo -e "${RED}ERROR${RESET}: $1"
+    _print_aligned "${RED}ERROR${RESET}:" "$1" $2
     graceful_exit
 }
 function warning_message() {
-    echo -e "${YELLOW}WARNING${RESET}: $1"
+    _print_aligned "${YELLOW}WARNING${RESET}:" "$1" $2
+}
+function info_message() {
+    _print_aligned "${BLUE}INFO${RESET}:" "$1" $2
 }
 function message() {
-    echo -e "${PURPLE}$1${RESET}: $2"
+    _print_aligned "${PURPLE}$1${RESET}:" "$2" $3
+}
+function _print_aligned() {
+    local left_str="$1"
+    local right_str="$2"
+    local width="${3:-30}"      # Total width defaults to 30 if not specified
+    printf "%-*s%s%s\n" "$width" "$left_str" "$right_str"
 }
 
 # ──── Helper Functions ──────────────────────────────────────────────────────────────
