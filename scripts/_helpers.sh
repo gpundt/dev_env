@@ -9,6 +9,12 @@ KITTY_CONF_DST=~/.config/kitty/kitty.conf
 ALACRITTY_CONFIG_SRC=$(pwd)/../configs/alacritty.toml
 ALACRITTY_CONF_DST=/.config/alacritty/alacritty.toml
 
+APT_DEPS_DIR=$(pwd)/../deps/apt
+APT_DEPS_LIST=$APT_DEPS_DIR/apt.list
+
+GIT_REPOS_DIR=$(pwd)/../deps/git
+GIT_REPOS_LIST=$GIT_REPOS_DIR/git.list
+
 # ──── Colors ─────────────────────────────────────────────────────────────────────── 
 RED=$'\033[1;31m'
 GREEN=$'\033[1;32m'
@@ -54,7 +60,7 @@ function _print_aligned() {
 }
 
 # ──── Helper Functions ──────────────────────────────────────────────────────────────
-function _create_dir() {
+function create_dir() {
     if [ ! -d "$1" ]; then
         start_step_message "$1" "substep"
         if ! sudo mkdir -p "$1"; then
@@ -63,37 +69,56 @@ function _create_dir() {
     fi
 }
 
-function _copy_file() {
+function copy_file() {
     start_step_message "$1 -> $2" "substep"
     if ! sudo cp -r $1 $2; then
         error_message "Failed to move $1 to $2"
     fi
 }
 
+function install_apt_deps() {
+    if [[ "$1" == "offline" ]]; then
+        start_step_message "Installing Downloaded .deb Packages from '${APT_DEPS_DIR}'"
+        if ! sudo dpkg -i $APT_DEPS_DIR/*.deb; then
+            error_message "Failed to 'sudo dpkg -i ${APT_DEPS_DIR}/*.deb'"
+        fi
+    else
+        start_step_message "Installing Apt Deps Listed in '${APT_DEPS_LIST}'"
+        if ! sudo apt install -y $(cat $APT_DEPS_LIST); then
+            error_message "Failed to install apt deps from ${APT_DEPS_LIST}"
+        fi
+    fi
+    successful
+}
+
+function pull_git_repos() {
+    start_step_message "Pulling Git Repos Listed in '${GIT_REPOS_LIST}'"
+    while IFS= read -r REPO; do
+        [ -z "$REPO" ] && continue      # skip empty lines
+        start_step_message "${REPO}" "substep"
+        if ! git clone "$REPO" $GIT_REPOS_DIR/; then
+            error_message "Failed to 'git clone ${REPO}'"
+        fi
+    done < "${GIT_REPOS_LIST}"
+    successful
+}
+
 # ──── Config File Placement ────────────────────────────────────────────────────────
-function _place_tmux_config() {
+function place_tmux_config() {
     start_step_message "Placing Tmux Config: '${TMUX_CONF_SRC}' -> '${TMUX_CONF_DST}'"
     _copy_file $TMUX_CONF_SRC $TMUX_CONF_DST
     successful
 }
 
-function _place_kitty_config() {
+function place_kitty_config() {
     start_step_message "Placing Kitty Config: '${KITTY_CONF_SRC}' -> '${KITTY_CONF_DST}'"
     mkdir -p ~/.config/kitty
     _copy_file $KITTY_CONF_SRC $KITTY_CONF_DST
     successful
 }
 
-function _place_alacritty_config() {
+function place_alacritty_config() {
     start_step_message "Placing Alacritty Config: '${ALACRTTY_CONF_SRC}' -> '${ALACRITTY_CONF_DST}'"
     _copy_file $ALACRTTY_CONF_SRC $ALACRITTY_CONF_DST
     successful
 }
-
-function main() {
-    info_message "balls"
-    warning_message "balls"
-    message "balls" "balls"
-    error_message "balls"
-}
-main
