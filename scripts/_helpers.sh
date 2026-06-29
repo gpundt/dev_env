@@ -11,11 +11,11 @@ ALACRITTY_CONF_DST=/.config/alacritty/alacritty.toml
 
 # ──── Colors ─────────────────────────────────────────────────────────────────────── 
 RED=$'\033[1;31m'
-GREEN=$'\033[0;32m'
-YELLOW=$'\033[0;33m'
-BLUE=$'\033[0;34m'
-PURPLE=$'\033[0;35m'
-CYAN=$'\033[0;36m'
+GREEN=$'\033[1;32m'
+YELLOW=$'\033[1;33m'
+BLUE=$'\033[1;34m'
+PURPLE=$'\033[1;35m'
+CYAN=$'\033[1;36m'
 RESET=$'\033[0m'
 
 # ──── Messages ─────────────────────────────────────────────────────────────────────
@@ -89,3 +89,11 @@ function _place_alacritty_config() {
     _copy_file $ALACRTTY_CONF_SRC $ALACRITTY_CONF_DST
     successful
 }
+
+function main() {
+    info_message "balls"
+    warning_message "balls"
+    message "balls" "balls"
+    error_message "balls"
+}
+main
