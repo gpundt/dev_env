@@ -66,3 +66,25 @@ function _individual_dep_install() {
 
     return 0
 }
+
+function pull_apt_deps() {
+    start_step_message "Pulling Apt Dependencies Listed in '${APT_DEPS_LIST}'"
+    pushd "$APT_DEPS_DIR" > /dev/null || {
+        error_message "Failed to 'pushd ${APT_DEPS_DIR}'"
+        return
+    }
+
+    while IFS= read -r PACKAGE || [[ -n "$PACKAGE" ]]; do
+        [ -z "$PACKAGE" ] && continue  # skip empty lines
+
+        start_step_message "${PACKAGE} -> '${APT_DEPS_DIR}'" "substep"
+        if ! sudo apt download -y "${PACKAGE}"; then
+            error_message "Failed to download ${PACKAGE}"
+            return
+        fi
+    done < "${APT_DEPS_LIST}"
+
+    popd > /dev/null
+    successful
+    APT_SUCCESS=true
+}

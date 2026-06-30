@@ -62,7 +62,6 @@ function configure_zsh() {
     # Relocate powerlevel10k config
     copy_file "$P10K_CONF_SRC" "$P10K_CONF_DST"
     if [ $? -ne 0 ]; then
-        ZSH_SUCCESS=false
         return
     fi 
 
