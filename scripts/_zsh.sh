@@ -23,11 +23,11 @@ function configure_zsh() {
         return
     fi
 
-
     pushd "$GIT_REPOS_DIR" > /dev/null || {
         error_message "Failed to 'pushd ${GIT_REPOS_DIR}'"
         return
     }
+    # Relocate zsh themes
     while IFS= read -r THEME || [[ -n "$THEME" ]]; do
         [ -z "$THEME" ] && continue     # skip empty lines
         for DIR in $(ls | grep -i "${THEME}"); do
@@ -39,6 +39,7 @@ function configure_zsh() {
         done
     done < "${ZSH_THEMES_LIST}"
 
+    # Relocate zsh plugins
     while IFS= read -r PLUGIN || [[ -n "$PLUGIN" ]]; do
         [ -z "$PLUGIN" ] && continue     # skip empty lines
         for DIR in $(ls | grep -i "${PLUGIN}"); do
@@ -51,13 +52,14 @@ function configure_zsh() {
     done < "${ZSH_PLUGINS_LIST}"
     popd > /dev/null
 
+    # Relocate zsh config
     copy_file $ZSH_CONF_SRC $ZSH_CONF_DST
     status=$?
     if [ $status -ne 0 ]; then
         return
     fi
 
-    # And in _configure_zsh:
+    # Relocate powerlevel10k config
     copy_file "$P10K_CONF_SRC" "$P10K_CONF_DST"
     if [ $? -ne 0 ]; then
         ZSH_CONFIG_SUCCESS=false

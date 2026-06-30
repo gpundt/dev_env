@@ -42,8 +42,10 @@ function install_go() {
     
     if command -v go &> /dev/null; then
         info_message "Skipping Golang install; already present..."
+        GOLANG_INSTALL_SUCCESS=true
         return
     fi
 
     successful
+    GOLANG_INSTALL_SUCCESS=TRUE
 }
