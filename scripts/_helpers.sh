@@ -2,33 +2,44 @@
 # ──── Filepaths ────────────────────────────────────────────────────────────────────
 TMUX_CONF_SRC=$(pwd)/../configs/tmux.conf
 TMUX_CONF_DST=~/.tmux.conf
-TMUX_CONFIG_SUCCESS=true
+TMUX_CONFIG_SUCCESS=false
 
 KITTY_DIR=~/.config/kitty
 KITTY_CONF_SRC=$(pwd)/../configs/kitty.conf
 KITTY_CONF_DST=$KITTY_DIR/kitty.conf
-KITTY_CONFIG_SUCCESS=true
+KITTY_CONFIG_SUCCESS=false
 
 ALACRITTY_DIR=~/.config/alacritty
 ALACRITTY_CONF_SRC=$(pwd)/../configs/alacritty.toml
 ALACRITTY_CONF_DST=$ALACRITTY_DIR/alacritty.toml
-ALACRITTY_CONFIG_SUCCESS=true
+ALACRITTY_CONFIG_SUCCESS=false
+
+ZSH_PLUGINS_LIST=$(pwd)/../deps/zsh/plugins.list
+ZSH_THEMES_LIST=$(pwd)/../deps/zsh/themes.list
+ZSH_CONF_SRC=$(pwd)/../configs/zshrc
+ZSH_CONF_DST=~/.zshrc
+OHMYZSH_DIR=~/.oh-my-zsh
+ZSH_PLUGINS_DST=$OHMYZSH_DIR/plugins/
+ZSH_THEMES_DST=$OHMYZSH_DIR/themes/
+ZSH_CONFIG_SUCCESS=false
+P10K_CONF_SRC=$(pwd)/../configs/p10k.zsh
+P10K_CONF_DST=~/.p10k.zsh
 
 APT_DEPS_DIR=$(pwd)/../deps/apt
 APT_DEPS_LIST=$APT_DEPS_DIR/apt.list
-APT_INSTALL_SUCCESS=true
+APT_INSTALL_SUCCESS=false
 
 PACMAN_DEPS_LIST=$(pwd)/../deps/pacman/pacman.list
-PACMAN_INSTALL_SUCCESS=true
+PACMAN_INSTALL_SUCCESS=false
 
 GIT_REPOS_DIR=$(pwd)/../deps/git
 GIT_REPOS_LIST=$GIT_REPOS_DIR/git.list
-GIT_CLONE_SUCCESS=true
+GIT_CLONE_SUCCESS=false
 
 FONTS_LIST=$(pwd)/../deps/fonts/fonts.list
-FONTS_CONFIG_SUCCESS=true
+FONTS_CONFIG_SUCCESS=false
 
-RUST_INSTALL_SUCCESS=true
+RUST_INSTALL_SUCCESS=false
 
 # ──── Colors ─────────────────────────────────────────────────────────────────────── 
 RED=$'\033[1;31m'
@@ -119,18 +130,27 @@ function install_deps() {
         start_step_message "Installing Apt Deps Listed in '${APT_DEPS_LIST}'"
         while IFS= read -r PACKAGE; do
             _individual_dep_install "${PACKAGE}" "${package_manager}" "${package_install_command}"
+            if [ $? -ne 0 ]; then
+                return
+            fi
         done < "${APT_DEPS_LIST}"
+        APT_INSTALL_SUCCESS=true
 
     elif [[ "$1" == "pacman" ]]; then
         start_step_message "Installing Pacman Deps Listed in '${PACMAN_DEPS_LIST}'"
         while IFS= read -r PACKAGE; do
             _individual_dep_install "${PACKAGE}" "${package_manager}" "${package_install_command}"
+            if [ $? -ne 0 ]; then
+                return
+            fi
         done < "${PACMAN_DEPS_LIST}"
+        PACMAN_INSTALL_SUCCESS=true
 
     else
         error_message "Package Manager '$package_manager' not supported"
     fi
     successful
+    
 }
 
 function _individual_dep_install() {
@@ -142,13 +162,11 @@ function _individual_dep_install() {
         start_step_message "${package}" "substep"
         if ! $package_install_command $package; then
             error_message "Failed to '${package_install_command} ${package}'"
-            if [[ "${package_manager}" == "apt" ]]; then
-                APT_INSTALL_SUCCESS=false
-            else
-                PACMAN_INSTALL_SUCCESS=false
-            fi
+            return 1
         fi
     fi
+
+    return 0
 }
 
 # ── Git Repos ─────────────
@@ -157,19 +175,31 @@ function pull_git_repos() {
 
     pushd "$GIT_REPOS_DIR" > /dev/null || {
         error_message "Failed to 'pushd ${GIT_REPOS_DIR}'"
+        GIT_CLONE_SUCCESS=false
+        return
     }
 
     while IFS= read -r REPO || [[ -n "$REPO" ]]; do
         [ -z "$REPO" ] && continue      # skip empty lines
+
+        local REPO_NAME
+        REPO_NAME=$(basename "$REPO" .git)          # extracts repo name, strips .git if present
+
+        if [ -d "$REPO_NAME" ]; then
+            info_message "Skipping '${REPO_NAME}' — directory already exists"
+            continue
+        fi
+        
         start_step_message "${REPO}" "substep"
-        if ! git clone "$REPO" </dev/null; then
+        if ! git clone --depth=1 "$REPO" </dev/null; then
             warning_message "Failed to 'git clone ${REPO}'"
-            GIT_CLONE_SUCCESS=false
+            return
         fi
     done < "${GIT_REPOS_LIST}"
 
     popd > /dev/null
     successful
+    GIT_CLONE_SUCCESS=true
 }
 
 # ── Fonts ────────────────
@@ -188,15 +218,13 @@ function install_fonts() {
 
         if ! curl -Lo "$TMP_ZIP" "$FONT_URL"; then
             error_message "Failed to download '${FONT_URL}'"
-            FONTS_CONFIG_SUCCESS=false
-            continue
+            return
         fi
 
         if ! unzip -o "$TMP_ZIP" -d "$FONT_DIR" > /dev/null 2>&1; then
             error_message "Failed to unzip '${TMP_ZIP}'"
             rm -rf "$TMP_ZIP"
-            FONTS_CONFIG_SUCCESS=false
-            continue
+            return
         fi
 
         rm -rf "$TMP_ZIP"
@@ -206,9 +234,11 @@ function install_fonts() {
 
     if ! fc-cache -fv; then
         error_message "Failed to 'fc-cache -fv'"
-        FONTS_CONFIG_SUCCESS=false
+        return
     fi
+
     successful
+    FONTS_CONFIG_SUCCESS=true
 }
 
 # ── Rustup and Cargo ───────
@@ -260,6 +290,7 @@ function recap() {
         "Tmux Configuration"
         "Kitty Configuration"
         "Alacritty Configuration"
+        "Zsh Configuration"
         "$package_label"
         "Git Repo Clones"
         "Font Installation"
@@ -269,6 +300,7 @@ function recap() {
         "$TMUX_CONFIG_SUCCESS"
         "$KITTY_CONFIG_SUCCESS"
         "$ALACRITTY_CONFIG_SUCCESS"
+        "$ZSH_CONFIG_SUCCESS"
         "$package_status"
         "$GIT_CLONE_SUCCESS"
         "$FONTS_CONFIG_SUCCESS"
@@ -282,6 +314,11 @@ function recap() {
 
     if [[ "$RUST_INSTALL_SUCCESS" == "true" ]]; then
         message "Next Steps" "Execute 'source \"$HOME/.cargo/env\"'"
+    fi
+
+    if [[ "$ZSH_CONFIG_SUCCESS" == "true" ]]; then
+        message "Next Steps" "Execute 'source ${ZSH_CONF_DST}'"
+        message "Next Steps" "Exexute 'chsh -s '$(which zsh)'"
     fi
 }
 
