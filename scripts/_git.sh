@@ -7,7 +7,7 @@ function pull_git_repos() {
 
     pushd "$GIT_REPOS_DIR" > /dev/null || {
         error_message "Failed to 'pushd ${GIT_REPOS_DIR}'"
-        GIT_CLONE_SUCCESS=false
+        GIT_SUCCESS=false
         return
     }
 
@@ -31,5 +31,5 @@ function pull_git_repos() {
 
     popd > /dev/null
     successful
-    GIT_CLONE_SUCCESS=true
+    GIT_SUCCESS=true
 }

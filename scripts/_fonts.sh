@@ -37,5 +37,5 @@ function install_fonts() {
     fi
 
     successful
-    FONTS_CONFIG_SUCCESS=true
+    FONTS_SUCCESS=true
 }

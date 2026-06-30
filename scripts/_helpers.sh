@@ -1,50 +1,60 @@
 #!/bin/bash
 # ──── Filepaths ────────────────────────────────────────────────────────────────────
+# ── Tmux ───────────────────
 TMUX_CONF_SRC=$(pwd)/../configs/tmux.conf
 TMUX_CONF_DST=~/.tmux.conf
-TMUX_CONFIG_SUCCESS=false
+TMUX_SUCCESS=false
 
+# ── Kitty ──────────────────
 KITTY_DIR=~/.config/kitty
 KITTY_CONF_SRC=$(pwd)/../configs/kitty.conf
 KITTY_CONF_DST=$KITTY_DIR/kitty.conf
-KITTY_CONFIG_SUCCESS=false
+KITTY_SUCCESS=false
 
+# ── Alacritty ──────────────
 ALACRITTY_DIR=~/.config/alacritty
 ALACRITTY_CONF_SRC=$(pwd)/../configs/alacritty.toml
 ALACRITTY_CONF_DST=$ALACRITTY_DIR/alacritty.toml
-ALACRITTY_CONFIG_SUCCESS=false
+ALACRITTY_SUCCESS=false
 
-ZSH_PLUGINS_LIST=$(pwd)/../deps/zsh/plugins.list
-ZSH_THEMES_LIST=$(pwd)/../deps/zsh/themes.list
+# ── Zsh ─────────────────────
 ZSH_CONF_SRC=$(pwd)/../configs/zshrc
 ZSH_CONF_DST=~/.zshrc
+ZSH_PLUGINS_LIST=$(pwd)/../deps/zsh/plugins.list
+ZSH_THEMES_LIST=$(pwd)/../deps/zsh/themes.list
 OHMYZSH_DIR=~/.oh-my-zsh
 ZSH_PLUGINS_DST=$OHMYZSH_DIR/plugins/
 ZSH_THEMES_DST=$OHMYZSH_DIR/themes/
-ZSH_CONFIG_SUCCESS=false
 P10K_CONF_SRC=$(pwd)/../configs/p10k.zsh
 P10K_CONF_DST=~/.p10k.zsh
+ZSH_SUCCESS=false
 
+# ── Apt ─────────────────────
 APT_DEPS_DIR=$(pwd)/../deps/apt
 APT_DEPS_LIST=$APT_DEPS_DIR/apt.list
-APT_INSTALL_SUCCESS=false
+APT_SUCCESS=false
 
+# ── Pacman ──────────────────
 PACMAN_DEPS_LIST=$(pwd)/../deps/pacman/pacman.list
-PACMAN_INSTALL_SUCCESS=false
+PACMAN_SUCCESS=false
 
 PACKAGE_MANAGER=""
 PACKAGE_INSTALL_COMMAND=""
 
+# ── Git ─────────────────────
 GIT_REPOS_DIR=$(pwd)/../deps/git
 GIT_REPOS_LIST=$GIT_REPOS_DIR/git.list
-GIT_CLONE_SUCCESS=false
+GIT_SUCCESS=false
 
+# ── Fonts ───────────────────
 FONTS_LIST=$(pwd)/../deps/fonts/fonts.list
-FONTS_CONFIG_SUCCESS=false
+FONTS_SUCCESS=false
 
-RUST_INSTALL_SUCCESS=false
+# ── Rust ────────────────────
+RUST_SUCCESS=false
 
-GOLANG_INSTALL_SUCCESS=false
+# ── Golang ──────────────────
+GOLANG_SUCCESS=false
 
 # ──── Colors ─────────────────────────────────────────────────────────────────────── 
 RED=$'\033[1;31m'
@@ -132,10 +142,10 @@ function recap() {
     local package_label package_status
     if [[ "$PACKAGE_MANAGER" == "apt" ]]; then
         package_label="Apt Package Installation"
-        package_status="$APT_INSTALL_SUCCESS"
+        package_status="$APT_SUCCESS"
     else
         package_label="Pacman Package Installation"
-        package_status="$PACMAN_INSTALL_SUCCESS"
+        package_status="$PACMAN_SUCCESS"
     fi
 
     local -a item_labels=(
@@ -149,14 +159,14 @@ function recap() {
         "Rust Installation"
     )
     local -a status_vars=(
-        "$TMUX_CONFIG_SUCCESS"
-        "$KITTY_CONFIG_SUCCESS"
-        "$ALACRITTY_CONFIG_SUCCESS"
-        "$ZSH_CONFIG_SUCCESS"
+        "$TMUX_SUCCESS"
+        "$KITTY_SUCCESS"
+        "$ALACRITTY_SUCCESS"
+        "$ZSH_SUCCESS"
         "$package_status"
-        "$GIT_CLONE_SUCCESS"
-        "$FONTS_CONFIG_SUCCESS"
-        "$RUST_INSTALL_SUCCESS"
+        "$GIT_SUCCESS"
+        "$FONTS_SUCCESS"
+        "$RUST_SUCCESS"
     )
     
     local i
@@ -164,11 +174,11 @@ function recap() {
         _recap_item "${item_labels[$i]}" "${status_vars[$i]}"
     done
 
-    if [[ "$RUST_INSTALL_SUCCESS" == "true" ]]; then
+    if [[ "$RUST_SUCCESS" == "true" ]]; then
         message "Next Steps" "Execute 'source \"$HOME/.cargo/env\"'"
     fi
 
-    if [[ "$ZSH_CONFIG_SUCCESS" == "true" ]]; then
+    if [[ "$ZSH_SUCCESS" == "true" ]]; then
         message "Next Steps" "Execute 'source ${ZSH_CONF_DST}'"
         message "Next Steps" "Exexute 'chsh -s '$(which zsh)'"
     fi

@@ -19,7 +19,7 @@ function configure_tmux() {
     fi
 
     successful
-    TMUX_CONFIG_SUCCESS=true
+    TMUX_SUCCESS=true
 }
 
 # ──── Configures Kitty using config file and plugins ───────────────────────────────
@@ -45,7 +45,7 @@ function configure_kitty() {
     fi
 
     successful
-    KITTY_CONFIG_SUCCESS=true
+    KITTY_SUCCESS=true
 }
 
 # ──── Configures Alacritty using config file ───────────────────────────────────────
@@ -59,5 +59,5 @@ function configure_alacritty() {
     fi
 
     successful
-    ALACRITTY_CONFIG_SUCCESS=true
+    ALACRITTY_SUCCESS=true
 }

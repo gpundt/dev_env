@@ -7,7 +7,7 @@ function install_rust() {
     
     if command -v cargo &> /dev/null && command -v rustup &> /dev/null; then
         info_message "Skipping rustup and cargo install; already present..."
-        RUST_INSTALL_SUCCESS=true
+        RUST_SUCCESS=true
         return
     fi
 
@@ -33,7 +33,7 @@ function install_rust() {
     fi
 
     successful
-    RUST_INSTALL_SUCCESS=true
+    RUST_SUCCESS=true
 }
 
 # ── Golang ─────────────────
@@ -42,10 +42,10 @@ function install_go() {
     
     if command -v go &> /dev/null; then
         info_message "Skipping Golang install; already present..."
-        GOLANG_INSTALL_SUCCESS=true
+        GOLANG_SUCCESS=true
         return
     fi
 
     successful
-    GOLANG_INSTALL_SUCCESS=TRUE
+    GOLANG_SUCCESS=TRUE
 }

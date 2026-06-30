@@ -32,7 +32,7 @@ function install_deps() {
                 return
             fi
         done < "${APT_DEPS_LIST}"
-        APT_INSTALL_SUCCESS=true
+        APT_SUCCESS=true
 
     elif [[ "$1" == "pacman" ]]; then
         start_step_message "Installing Pacman Deps Listed in '${PACMAN_DEPS_LIST}'"
@@ -42,7 +42,7 @@ function install_deps() {
                 return
             fi
         done < "${PACMAN_DEPS_LIST}"
-        PACMAN_INSTALL_SUCCESS=true
+        PACMAN_SUCCESS=true
 
     else
         error_message "Package Manager '$package_manager' not supported"
