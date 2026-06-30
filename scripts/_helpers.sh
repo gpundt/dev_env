@@ -2,24 +2,33 @@
 # ──── Filepaths ────────────────────────────────────────────────────────────────────
 TMUX_CONF_SRC=$(pwd)/../configs/tmux.conf
 TMUX_CONF_DST=~/.tmux.conf
+TMUX_CONFIG_SUCCESS=true
 
 KITTY_DIR=~/.config/kitty
 KITTY_CONF_SRC=$(pwd)/../configs/kitty.conf
 KITTY_CONF_DST=$KITTY_DIR/kitty.conf
+KITTY_CONFIG_SUCCESS=true
 
 ALACRITTY_DIR=~/.config/alacritty
 ALACRITTY_CONF_SRC=$(pwd)/../configs/alacritty.toml
 ALACRITTY_CONF_DST=$ALACRITTY_DIR/alacritty.toml
+ALACRITTY_CONFIG_SUCCESS=true
 
 APT_DEPS_DIR=$(pwd)/../deps/apt
 APT_DEPS_LIST=$APT_DEPS_DIR/apt.list
+APT_INSTALL_SUCCESS=true
 
 PACMAN_DEPS_LIST=$(pwd)/../deps/pacman/pacman.list
+PACMAN_INSTALL_SUCCESS=true
 
 GIT_REPOS_DIR=$(pwd)/../deps/git
 GIT_REPOS_LIST=$GIT_REPOS_DIR/git.list
+GIT_CLONE_SUCCESS=true
 
 FONTS_LIST=$(pwd)/../deps/fonts/fonts.list
+FONTS_CONFIG_SUCCESS=true
+
+RUST_INSTALL_SUCCESS=true
 
 # ──── Colors ─────────────────────────────────────────────────────────────────────── 
 RED=$'\033[1;31m'
@@ -30,7 +39,7 @@ PURPLE=$'\033[1;35m'
 CYAN=$'\033[1;36m'
 RESET=$'\033[0m'
 
-# ──── Messages ─────────────────────────────────────────────────────────────────────
+# ──── Message Functions ─────────────────────────────────────────────────────────────
 function graceful_exit() {
     echo -e "${RED}*Closing*${RESET}"
     exit 1
@@ -47,7 +56,9 @@ function successful() {
 }
 function error_message() {
     _print_aligned "${RED}ERROR${RESET}:" "$1" $2
-    graceful_exit
+    if [[ "$3" == "exit" ]]; then
+        graceful_exit
+    fi
 }
 function warning_message() {
     _print_aligned "${YELLOW}WARNING${RESET}:" "$1" $2
@@ -65,7 +76,7 @@ function _print_aligned() {
     printf "%-*s%s%s\n" "$width" "$left_str" "$right_str"
 }
 
-# ──── Helper Functions ──────────────────────────────────────────────────────────────
+# ──── File Helper Functions ─────────────────────────────────────────────────────────
 function create_dir() {
     if [ ! -d "$1" ]; then
         start_step_message "$1" "substep"
@@ -83,18 +94,23 @@ function copy_file() {
         else
             error_message "Src '$1' does not exist"
         fi
+        return 1
     fi
 
-    if ! sudo cp -r $1 $2 >/dev/null 2>&1; then
+    if ! sudo cp -rf $1 $2 >/dev/null 2>&1; then
         if [[ "$3" == "warning" ]]; then
             warning_message "Failed to move $1 to $2"
             return
         else
             error_message "Failed to move $1 to $2"
         fi
+        return 1
     fi
+    return 0
 }
 
+# ──── Package Installations ─────────────────────────────────────────────────────────
+# ── Apt and Pacman ─────────
 function install_deps() {
     local package_manager=$1
     local package_install_command=$2
@@ -123,41 +139,46 @@ function _individual_dep_install() {
     local package_install_command=$3
 
     if ! command -v $package &> /dev/null; then
-        start_step_message "${package}"
+        start_step_message "${package}" "substep"
         if ! $package_install_command $package; then
             error_message "Failed to '${package_install_command} ${package}'"
+            if [[ "${package_manager}" == "apt" ]]; then
+                APT_INSTALL_SUCCESS=false
+            else
+                PACMAN_INSTALL_SUCCESS=false
+            fi
         fi
     fi
 }
 
-function download_apt_packages() {
-    start_step_message "Installing Downloaded .deb Packages from '${APT_DEPS_DIR}'"
-    if ! sudo dpkg -i $APT_DEPS_DIR/*.deb; then
-        error_message "Failed to 'sudo dpkg -i ${APT_DEPS_DIR}/*.deb'"
-    fi
-}
-
+# ── Git Repos ─────────────
 function pull_git_repos() {
     start_step_message "Pulling Git Repos Listed in '${GIT_REPOS_LIST}'"
-    git remote set-url origin https://github.com
-    pushd $GIT_REPOS_DIR > /dev/null || error_message "Failed to 'pushd ${GIT_REPOS_DIR}'"
-    while IFS= read -r REPO; do
+
+    pushd "$GIT_REPOS_DIR" > /dev/null || {
+        error_message "Failed to 'pushd ${GIT_REPOS_DIR}'"
+    }
+
+    while IFS= read -r REPO || [[ -n "$REPO" ]]; do
         [ -z "$REPO" ] && continue      # skip empty lines
         start_step_message "${REPO}" "substep"
-        if ! git clone "$REPO"; then
+        if ! git clone "$REPO" </dev/null; then
             warning_message "Failed to 'git clone ${REPO}'"
+            GIT_CLONE_SUCCESS=false
         fi
     done < "${GIT_REPOS_LIST}"
+
     popd > /dev/null
     successful
 }
 
-function add_fonts() {
+# ── Fonts ────────────────
+function install_fonts() {
     start_step_message "Adding Fonts"
     mkdir -p ~/.local/share/fonts
-    while IFS= read -r FONT_URL; do
+    while IFS= read -r FONT_URL || [[ -n "$FONT_URL" ]]; do
         [ -z "$FONT_URL" ] && continue      # skip empty lines
-        start_step_message "${FONT_URL}"
+        start_step_message "${FONT_URL}" "substep"
 
         FONT_NAME=$(basename "$FONT_URL" .zip)
         FONT_DIR=~/.local/share/fonts/$FONT_NAME
@@ -166,13 +187,15 @@ function add_fonts() {
         mkdir -p "$FONT_DIR"
 
         if ! curl -Lo "$TMP_ZIP" "$FONT_URL"; then
-            warning_message "Failed to download '${FONT_URL}'"
+            error_message "Failed to download '${FONT_URL}'"
+            FONTS_CONFIG_SUCCESS=false
             continue
         fi
 
         if ! unzip -o "$TMP_ZIP" -d "$FONT_DIR" > /dev/null 2>&1; then
-            warning_message "Failed to unzip '${TMP_ZIP}'"
+            error_message "Failed to unzip '${TMP_ZIP}'"
             rm -rf "$TMP_ZIP"
+            FONTS_CONFIG_SUCCESS=false
             continue
         fi
 
@@ -183,20 +206,92 @@ function add_fonts() {
 
     if ! fc-cache -fv; then
         error_message "Failed to 'fc-cache -fv'"
+        FONTS_CONFIG_SUCCESS=false
     fi
     successful
 }
 
+# ── Rustup and Cargo ───────
 function install_rust() {
     if command -v cargo &> /dev/null && command -v rustup &> /dev/null; then
         return
     fi
 
+    local rustup_init
+    rustup_init=$(mktemp /tmp/rustup-init.XXXXXX.sh) || {
+        error_message "Failed to create temp file for rustup installer"
+        RUST_INSTALL_SUCCESS=false
+        return
+    }
+
+    trap 'rm -f "$rustup_init"' RETURN
+
+    start_step_message "Downloading Rustup Installer"
+    if ! curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs -o "$rustup_init"; then
+        error_message "Failed to download rustup installer"
+        RUST_INSTALL_SUCCESS=false
+        return
+    fi
+    successful
+
     start_step_message "Installing Cargo and Rustup"
-    if ! curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh; then
+    if ! /bin/sh "$rustup_init"; then
         error_message "Failed to install Cargo and Rustup"
+        RUST_INSTALL_SUCCESS=false
+        return
+    fi
+    successful
+}
+
+# ──── Configuration Recap ─────────────────────────────────────────────────────────
+function recap() {
+    start_step_message "Installation Recap"
+    
+    local package_label package_status
+    if [[ "$PACKAGE_MANAGER" == "apt" ]]; then
+        package_label="Apt Package Installation"
+        package_status="$APT_INSTALL_SUCCESS"
+    else
+        package_label="Pacman Package Installation"
+        package_status="$PACMAN_INSTALL_SUCCESS"
     fi
 
-    message "Next Steps" "Execute 'source \"$HOME/.cargo/env\"'"
-    successful
+    local -a item_labels=(
+        "Tmux Configuration"
+        "Kitty Configuration"
+        "Alacritty Configuration"
+        "$package_label"
+        "Git Repo Clones"
+        "Font Installation"
+        "Rust Installation"
+    )
+    local -a status_vars=(
+        "$TMUX_CONFIG_SUCCESS"
+        "$KITTY_CONFIG_SUCCESS"
+        "$ALACRITTY_CONFIG_SUCCESS"
+        "$package_status"
+        "$GIT_CLONE_SUCCESS"
+        "$FONTS_CONFIG_SUCCESS"
+        "$RUST_INSTALL_SUCCESS"
+    )
+    
+    local i
+    for i in "${!item_labels[@]}"; do
+        _recap_item "${item_labels[$i]}" "${status_vars[$i]}"
+    done
+
+    if [[ "$RUST_INSTALL_SUCCESS" == "true" ]]; then
+        message "Next Steps" "Execute 'source \"$HOME/.cargo/env\"'"
+    fi
+}
+
+function _recap_item() {
+    local item_label="$1"
+    local status_var="$2"
+
+    if [[ "$status_var" == "true" ]]; then
+        message "$item_label" "${GREEN}Success${RESET}" 40
+    else
+        message "$item_label" "${RED}Failure${RESET}" 40
+    fi
 }
