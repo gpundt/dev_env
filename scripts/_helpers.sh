@@ -54,6 +54,7 @@ FONTS_SUCCESS=false
 RUST_SUCCESS=false
 
 # ── Golang ──────────────────
+GOLANG_VERSION="1.26.0"
 GOLANG_SUCCESS=false
 
 # ──── Colors ─────────────────────────────────────────────────────────────────────── 
