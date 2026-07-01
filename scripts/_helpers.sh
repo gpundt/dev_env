@@ -73,7 +73,7 @@ function graceful_exit() {
 }
 function start_step_message() {
     if [[ $# -eq 2 && "$2" == "substep" ]]; then
-        echo -e "\n\t${CYAN}* $1 *${RESET}"
+        echo -e "\t${CYAN}* $1 *${RESET}"
     else
         echo -e "\n${CYAN}[*] $1 [*]${RESET}"
     fi
@@ -158,6 +158,7 @@ function recap() {
         "Git Repo Clones"
         "Font Installation"
         "Rust Installation"
+        "Golang Installation"
     )
     local -a status_vars=(
         "$TMUX_SUCCESS"
@@ -168,6 +169,7 @@ function recap() {
         "$GIT_SUCCESS"
         "$FONTS_SUCCESS"
         "$RUST_SUCCESS"
+        "$GOLANG_SUCCESS"
     )
     
     local i

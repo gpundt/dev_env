@@ -24,7 +24,6 @@ function install_rust() {
         error_message "Failed to download rustup installer"
         return
     fi
-    successful
 
     start_step_message "Running rustup_init install script" "substep"
     if ! /bin/sh "$rustup_init"; then

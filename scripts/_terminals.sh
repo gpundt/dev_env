@@ -5,7 +5,17 @@ source ./_helpers.sh
 function configure_tmux() {
     start_step_message "Configuring Tmux"
 
-    mkdir -p ~/.tmux/plugins/
+    mkdir -p ~/.tmux/plugins/catppuccin
+    pushd "$GIT_REPOS_DIR/tmux" > /dev/null
+    git checkout v2.3.0
+    popd > /dev/null
+
+    copy_file $GIT_REPOS_DIR/tmux ~/.tmux/plugins/catppuccin/tmux
+    status=$?
+    if [ $status -ne 0 ]; then
+        return
+    fi
+
     copy_file $GIT_REPOS_DIR/tpm ~/.tmux/plugins/
     status=$?
     if [ $status -ne 0 ]; then
@@ -25,6 +35,24 @@ function configure_tmux() {
 # ──── Configures Kitty using config file and plugins ───────────────────────────────
 function configure_kitty() {
     start_step_message "Configuring Kitty"
+
+    start_step_message "Pulling Installer" "substep"
+    kitty_installer=$(mktemp /tmp/kitty_installer.XXXXXX.sh) || {
+        error_message "Failed to create temp file for kitty installer"
+        return 
+    }
+    trap 'rm -f "$kitty_installer"' RETURN
+    if ! curl https://sw.kovidgoyal.net/kitty/installer.sh -o "$kitty_installer"; then
+        error_message "Failed to pull kitty installer"
+        return
+    fi
+
+    start_step_message "Running Installer" "substep"
+    if ! /bin/sh "$kitty_installer"; then
+        error_message "Failed to run kitty installer"
+        return
+    fi
+
     mkdir -p $KITTY_DIR/themes
     copy_file $KITTY_CONF_SRC $KITTY_CONF_DST
     status=$?
