@@ -11,7 +11,7 @@ function determine_package_manager() {
     elif command -v pacman &> /dev/null; then
         message "Package Manager" "Pacman"
         PACKAGE_MANAGER="pacman"
-        PACKAGE_INSTALL_COMMAND="sudo pacman -s"
+        PACKAGE_INSTALL_COMMAND="sudo pacman -S --noconfirm"
     
     else
         error_message "Neither Apt or Pacman package manager found"

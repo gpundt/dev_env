@@ -60,7 +60,7 @@ function configure_kitty() {
         return
     fi
 
-    copy_file $GIT_REPOS_DIR/kitty-themes/themes/* $KITTY_DIR/themes/
+    cp $GIT_REPOS_DIR/kitty-themes/themes/* $KITTY_DIR/themes/
     status=$?
     if [ $status -ne 0 ]; then
         return
