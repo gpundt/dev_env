@@ -1,6 +1,11 @@
 #!/bin/bash
 source ./_helpers.sh
 
+# ── Fonts ───────────────────
+FONTS_LIST=$(pwd)/../deps/fonts/fonts.list
+FONTS_SUCCESS=false
+
+
 # ── Fonts ────────────────
 function install_fonts() {
     start_step_message "Adding Fonts"

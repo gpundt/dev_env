@@ -1,6 +1,14 @@
 #!/bin/bash
 source ./_helpers.sh
 
+# ── Rust ────────────────────
+RUST_SUCCESS=false
+
+# ── Golang ──────────────────
+GOLANG_VERSION="1.26.0"
+GOLANG_SUCCESS=false
+
+
 # ── Rustup and Cargo ───────
 function install_rust() {
     start_step_message "Installing Cargo and Rustup"

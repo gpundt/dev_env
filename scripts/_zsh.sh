@@ -1,6 +1,18 @@
 #!/bin/bash
 source ./_helpers.sh
 
+# ── Zsh ─────────────────────
+ZSH_CONF_SRC=$(pwd)/../configs/zshrc
+ZSH_CONF_DST=~/.zshrc
+ZSH_PLUGINS_LIST=$(pwd)/../deps/zsh/plugins.list
+ZSH_THEMES_LIST=$(pwd)/../deps/zsh/themes.list
+OHMYZSH_DIR=~/.oh-my-zsh
+ZSH_PLUGINS_DST=$OHMYZSH_DIR/plugins/
+ZSH_THEMES_DST=$OHMYZSH_DIR/themes/
+P10K_CONF_SRC=$(pwd)/../configs/p10k.zsh
+P10K_CONF_DST=~/.p10k.zsh
+ZSH_SUCCESS=false
+
 # ──── Configures Zsh using config file, plugins, and themes ────────────────────────
 function configure_zsh() {
     start_step_message "Configuring Zsh"
