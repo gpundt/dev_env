@@ -2,3 +2,12 @@ zsh
 eza
 tmux
 alacritty
+neovim
+base-devel
+ripgrep
+gcc
+lazygit
+fd
+wl-clipboard
+nodejs
+npm

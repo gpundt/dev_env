@@ -10,19 +10,19 @@ source ./_languages.sh
 
 # ──── Script entrypoint ────────────────────────────────────────────────────────────
 function main() {
-    determine_package_manager
-    install_deps "${PACKAGE_MANAGER}" "${PACKAGE_INSTALL_COMMAND}"
-    pull_git_repos
-    install_fonts
+  determine_package_manager
+  install_deps "${PACKAGE_MANAGER}" "${PACKAGE_INSTALL_COMMAND}"
+  pull_git_repos
+  install_fonts
 
-    configure_tmux
-    configure_kitty
-    configure_alacritty
-    configure_zsh
-    
-    install_rust
-    install_go
+  configure_tmux
+  configure_kitty
+  configure_alacritty
+  configure_zsh
 
-    recap
+  install_rust
+  install_go
+
+  recap
 }
 main
