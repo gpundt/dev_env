@@ -6,9 +6,15 @@ function configure_tmux() {
     start_step_message "Configuring Tmux"
 
     mkdir -p ~/.tmux/plugins/catppuccin
-    pushd "$GIT_REPOS_DIR/tmux" > /dev/null
+    pushd "$GIT_REPOS_DIR/tmux" > /dev/null || {
+        error_message "Failed to 'pushd \"$GIT_REPOS_DIR/tmux\"'"
+        return
+    }
     git checkout v2.3.0
-    popd > /dev/null
+    popd > /dev/null || {
+        error_message "Failed to 'popd'"
+        return
+    }
 
     copy_file $GIT_REPOS_DIR/tmux ~/.tmux/plugins/catppuccin/tmux
     status=$?

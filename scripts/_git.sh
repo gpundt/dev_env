@@ -28,7 +28,10 @@ function pull_git_repos() {
         fi
     done < "${GIT_REPOS_LIST}"
 
-    popd > /dev/null
+    popd > /dev/null || {
+        error_message "Failed to 'popd'"
+        return
+    }
     successful
     GIT_SUCCESS=true
 }

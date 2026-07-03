@@ -5,6 +5,11 @@ source ./_helpers.sh
 function configure_zsh() {
     start_step_message "Configuring Zsh"
     start_step_message "Oh My Zsh" "substep"
+    if [ -d $OHMYZSH_DIR ]; then
+        info_message "Skipping; Oh-my-zsh already exists..."
+        ZSH_SUCCESS=true
+        return
+    fi
 
     local ohmyzsh_init
     ohmyzsh_init=$(mktemp /tmp/ohmyzsh-install.XXXXXX.sh) || {
@@ -50,7 +55,10 @@ function configure_zsh() {
             fi
         done
     done < "${ZSH_PLUGINS_LIST}"
-    popd > /dev/null
+    popd > /dev/null || {
+        error_message "Failed to 'popd'"
+        return
+    }
 
     # Relocate zsh config
     copy_file $ZSH_CONF_SRC $ZSH_CONF_DST
