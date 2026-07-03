@@ -67,7 +67,7 @@ function copy_file() {
     return 1
   fi
 
-  if ! sudo cp -rf $1 $2 >/dev/null 2>&1; then
+  if ! sudo cp -rf "$1" "$2" >/dev/null 2>&1; then
     if [[ "$3" == "warning" ]]; then
       warning_message "Failed to move $1 to $2"
       return

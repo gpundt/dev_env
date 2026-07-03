@@ -18,6 +18,12 @@ function install_fonts() {
         FONT_DIR=~/.local/share/fonts/$FONT_NAME
         TMP_ZIP=/tmp/${FONT_NAME}.zip
 
+        # Skip if this font is already installed (dir exists and has font files)
+        if [ -d "$FONT_DIR" ] && find "$FONT_DIR" -type f \( -iname "*.ttf" -o -iname "*.otf" \) -print -quit | grep -q .; then
+            info_message "${FONT_NAME} already installed... skipping"
+            continue
+        fi
+
         mkdir -p "$FONT_DIR"
 
         if ! curl -Lo "$TMP_ZIP" "$FONT_URL"; then

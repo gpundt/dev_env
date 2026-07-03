@@ -73,7 +73,7 @@ function configure_zsh() {
     }
 
     # Relocate zsh config
-    copy_file $ZSH_CONF_SRC $ZSH_CONF_DST
+    copy_file "$ZSH_CONF_SRC" "$ZSH_CONF_DST"
     status=$?
     if [ $status -ne 0 ]; then
         return

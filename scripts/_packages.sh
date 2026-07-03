@@ -69,9 +69,9 @@ function _individual_dep_install() {
     local package_manager=$2
     local package_install_command=$3
 
-    if ! command -v $package &> /dev/null; then
+    if ! command -v "$package" &> /dev/null; then
         start_step_message "${package}" "substep"
-        if ! $package_install_command $package; then
+        if ! $package_install_command "$package"; then
             error_message "Failed to '${package_install_command} ${package}'"
             return 1
         fi
