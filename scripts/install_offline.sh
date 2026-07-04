@@ -1,6 +1,7 @@
 #!/bin/bash
 source ./_helpers.sh
 
+# ──── Script entrypoint ────────────────────────────────────────────────────────────
 function main() {
     install_apt_deps "offline"
 

@@ -2,7 +2,7 @@
 source ./_helpers.sh
 source ./_packages.sh
 
-
+# ──── Script entrypoint ────────────────────────────────────────────────────────────
 function main() {
     verify_package_manager
     if [[ "${PACKAGE_MANAGER}" == "pacman" ]]; then
