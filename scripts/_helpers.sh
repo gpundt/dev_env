@@ -93,6 +93,23 @@ function help_message() {
 # ──── Configuration Cleanup ───────────────────────────────────────────────────────
 function cleanup() {
   start_step_message "Cleaning Up"
+
+  start_step_message "Git"
+
+  pushd "$GIT_REPOS_DIR" > /dev/null || {
+      error_message "Failed to 'pushd ${GIT_REPOS_DIR}'"
+      return
+  }
+  if ! find . -mindepth 1 ! -name "$(basename "$GIT_REPOS_LIST")" -delete; then
+    error_message "Failed to clean '${GIT_REPOS_DIR}'"
+    return
+  fi
+  popd > /dev/null || {
+      error_message "Failed to 'popd'"
+      return
+  }
+
+  successful
 }
 
 # ──── Configuration Recap ─────────────────────────────────────────────────────────
