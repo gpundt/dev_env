@@ -1,6 +1,7 @@
 #!/bin/bash
 source ./_helpers.sh
 
+# ── Global Variables ────────────────────────────────────────────────────────────────
 # ── Zsh ─────────────────────
 ZSH_CONF_SRC=$(pwd)/../configs/zshrc
 ZSH_CONF_DST=~/.zshrc

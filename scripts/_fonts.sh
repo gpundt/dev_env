@@ -1,12 +1,12 @@
 #!/bin/bash
 source ./_helpers.sh
 
-# ── Fonts ───────────────────
+# ── Global Variables ────────────────────────────────────────────────────────────────
 FONTS_LIST=$(pwd)/../deps/fonts/fonts.list
 FONTS_SUCCESS=false
 
 
-# ── Fonts ────────────────
+# ──── Font Configuration ────────────────────────────────────────────────────────────
 function install_fonts() {
     start_step_message "Adding Fonts"
     mkdir -p ~/.local/share/fonts

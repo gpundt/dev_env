@@ -1,6 +1,7 @@
 #!/bin/bash
 source ./_helpers.sh
 
+# ── Global Variables ────────────────────────────────────────────────────────────────
 # ── Rust ────────────────────
 RUST_SUCCESS=false
 
@@ -9,7 +10,7 @@ GOLANG_VERSION="1.26.0"
 GOLANG_SUCCESS=false
 
 
-# ── Rustup and Cargo ───────
+# ── Rustup and Cargo Installation ───────────────────────────────────────────────────
 function install_rust() {
     start_step_message "Installing Cargo and Rustup"
     
@@ -43,7 +44,7 @@ function install_rust() {
     RUST_SUCCESS=true
 }
 
-# ── Golang ─────────────────
+# ── Golang Installation ─────────────────────────────────────────────────────────────
 function install_go() {
     start_step_message "Installing Golang"
     
@@ -53,7 +54,7 @@ function install_go() {
         return
     fi
 
-    if ! _pull_go_binaries; then
+    if ! pull_go_binary; then
         error_message "Failed to pull golang bianary tarball"
         return
     fi
@@ -72,7 +73,7 @@ function install_go() {
     GOLANG_SUCCESS=true
 }
 
-function _pull_go_binaries() {
+function pull_go_binary() {
     start_step_message "Pulling Binaries"
 
     ARCH=$(uname -m)
@@ -92,5 +93,4 @@ function _pull_go_binaries() {
     fi
 
     return 0
-
 }

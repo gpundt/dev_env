@@ -1,6 +1,10 @@
 #!/bin/bash
 source ./_helpers.sh
 
+# ── Global Variables ────────────────────────────────────────────────────────────────
+PACKAGE_MANAGER=""
+PACKAGE_INSTALL_COMMAND=""
+
 # ── Apt ─────────────────────
 APT_DEPS_DIR=$(pwd)/../deps/apt
 APT_DEPS_LIST=$APT_DEPS_DIR/apt.list
@@ -10,11 +14,8 @@ APT_SUCCESS=false
 PACMAN_DEPS_LIST=$(pwd)/../deps/pacman/pacman.list
 PACMAN_SUCCESS=false
 
-PACKAGE_MANAGER=""
-PACKAGE_INSTALL_COMMAND=""
 
-
-# ──── Determines what ackage manager this host uses (Pacman | Apt) ────────────────
+# ──── Determines what package manager this host uses (Pacman | Apt) ───────────────
 function determine_package_manager() {
     if command -v apt &> /dev/null; then
         message "Package Manager" "Apt"

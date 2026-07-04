@@ -1,6 +1,7 @@
 #!/bin/bash
 source ./_helpers.sh
 
+# ── Global Variables ────────────────────────────────────────────────────────────────
 # ── Tmux ───────────────────
 TMUX_CONF_SRC=$(pwd)/../configs/tmux.conf
 TMUX_CONF_DST=~/.tmux.conf

@@ -1,13 +1,13 @@
 #!/bin/bash
 source ./_helpers.sh
 
-# ── Git ─────────────────────
+# ── Global Variables ────────────────────────────────────────────────────────────────
 GIT_REPOS_DIR=$(pwd)/../deps/git
 GIT_REPOS_LIST=$GIT_REPOS_DIR/git.list
 GIT_SUCCESS=false
 
 
-# ── Git Repos ─────────────
+# ── Git Repo Pull ───────────────────────────────────────────────────────────────────
 function pull_git_repos() {
     start_step_message "Pulling Git Repos Listed in '${GIT_REPOS_LIST}'"
 
