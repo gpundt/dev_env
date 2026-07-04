@@ -8,8 +8,15 @@ source ./_terminals.sh
 source ./_zsh.sh
 source ./_languages.sh
 
+if [[ "$1" == "-h" ]]; then
+  help_message "$0"
+  exit 0
+fi
+
 # ──── Script entrypoint ────────────────────────────────────────────────────────────
 function main() {
+  local option="$1"
+
   determine_package_manager
   install_deps "${PACKAGE_MANAGER}" "${PACKAGE_INSTALL_COMMAND}"
   pull_git_repos
@@ -23,6 +30,10 @@ function main() {
   install_rust
   install_go
 
+  if [[ "$option" == "--cleanup" ]]; then
+    cleanup
+  fi
+
   recap
 }
-main
+main "$1"

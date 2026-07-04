@@ -79,6 +79,22 @@ function copy_file() {
   return 0
 }
 
+# ──── Help Message ───────────────────────────────────────────────────────────────
+function help_message() {
+  local script_name="$1"
+
+  if [[ "$script_name" == "./install_online.sh" ]]; then
+    message "Usage" "${script_name} [OPTION]"
+    message "Help"  "${script_name} -h"
+    message "Cleanup" "${script_name} --cleanup"
+  fi
+}
+
+# ──── Configuration Cleanup ───────────────────────────────────────────────────────
+function cleanup() {
+  start_step_message "Cleaning Up"
+}
+
 # ──── Configuration Recap ─────────────────────────────────────────────────────────
 function recap() {
   start_step_message "Installation Recap"

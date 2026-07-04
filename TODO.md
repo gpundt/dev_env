@@ -1,8 +1,5 @@
 ## Things to do
 
-### Minimize Installer Scripts
-- Pull binaries instead (Better for offline and badly-networked setups)
-
 ### Helper functions
 - Functions to pull binaries
 - Functions to cleanup
