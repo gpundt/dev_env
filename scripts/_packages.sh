@@ -40,8 +40,7 @@ function install_deps() {
     if [[ "${package_manager}" == "apt" ]]; then
         start_step_message "Installing Apt Deps Listed in '${APT_DEPS_LIST}'"
         while IFS= read -r PACKAGE; do
-            _individual_dep_install "${PACKAGE}" "${package_manager}" "${package_install_command}"
-            if [ $? -ne 0 ]; then
+            if ! _individual_dep_install "${PACKAGE}" "${package_manager}" "${package_install_command}"; then
                 return
             fi
         done < "${APT_DEPS_LIST}"
@@ -50,8 +49,7 @@ function install_deps() {
     elif [[ "$1" == "pacman" ]]; then
         start_step_message "Installing Pacman Deps Listed in '${PACMAN_DEPS_LIST}'"
         while IFS= read -r PACKAGE; do
-            _individual_dep_install "${PACKAGE}" "${package_manager}" "${package_install_command}"
-            if [ $? -ne 0 ]; then
+            if ! _individual_dep_install "${PACKAGE}" "${package_manager}" "${package_install_command}"; then
                 return
             fi
         done < "${PACMAN_DEPS_LIST}"

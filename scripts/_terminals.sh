@@ -33,21 +33,15 @@ function configure_tmux() {
     return
   }
 
-  copy_file "$GIT_REPOS_DIR"/tmux ~/.tmux/plugins/catppuccin/tmux
-  status=$?
-  if [ $status -ne 0 ]; then
+  if ! copy_file "$GIT_REPOS_DIR"/tmux ~/.tmux/plugins/catppuccin/tmux; then
     return
   fi
 
-  copy_file "$GIT_REPOS_DIR"/tpm ~/.tmux/plugins/
-  status=$?
-  if [ $status -ne 0 ]; then
+  if ! copy_file "$GIT_REPOS_DIR"/tpm ~/.tmux/plugins/; then
     return
   fi
 
-  copy_file "$TMUX_CONF_SRC" $TMUX_CONF_DST
-  status=$?
-  if [ $status -ne 0 ]; then
+  if ! copy_file "$TMUX_CONF_SRC" $TMUX_CONF_DST; then
     return
   fi
 
@@ -82,21 +76,15 @@ function configure_kitty() {
   fi
 
   mkdir -p $KITTY_DIR/themes
-  copy_file "$KITTY_CONF_SRC" "$KITTY_CONF_DST"
-  status=$?
-  if [ $status -ne 0 ]; then
+  if ! copy_file "$KITTY_CONF_SRC" "$KITTY_CONF_DST"; then
     return
   fi
 
-  cp "$GIT_REPOS_DIR"/kitty-themes/themes/* $KITTY_DIR/themes/
-  status=$?
-  if [ $status -ne 0 ]; then
+  if ! cp "$GIT_REPOS_DIR"/kitty-themes/themes/* $KITTY_DIR/themes/; then
     return
   fi
 
-  copy_file "$KITTY_DIR"/themes/Broadcast.conf $KITTY_DIR/current-theme.conf
-  status=$?
-  if [ $status -ne 0 ]; then
+  if ! copy_file "$KITTY_DIR"/themes/Broadcast.conf $KITTY_DIR/current-theme.conf; then
     return
   fi
 
@@ -108,9 +96,7 @@ function configure_kitty() {
 function configure_alacritty() {
   start_step_message "Configuring Alacritty"
   mkdir -p $ALACRITTY_DIR
-  copy_file "$ALACRITTY_CONF_SRC" "$ALACRITTY_CONF_DST"
-  status=$?
-  if [ $status -ne 0 ]; then
+  if ! copy_file "$ALACRITTY_CONF_SRC" "$ALACRITTY_CONF_DST"; then
     return
   fi
 

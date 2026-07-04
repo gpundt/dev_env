@@ -26,8 +26,7 @@ function install_fonts() {
 
         mkdir -p "$FONT_DIR"
 
-        if ! curl -Lo "$TMP_ZIP" "$FONT_URL"; then
-            error_message "Failed to download '${FONT_URL}'"
+        if ! pull_font_url "$FONT_URL" "$TMP_ZIP"; then
             return
         fi
 
@@ -49,4 +48,16 @@ function install_fonts() {
 
     successful
     FONTS_SUCCESS=true
+}
+
+function pull_font_url() {
+    local url=$1
+    local tmp_zip=$2
+
+    if ! curl -Lo "$tmp_zip" "$url"; then
+        error_message "Failed to download '${url}'"
+        return 1
+    fi
+
+    return 0
 }

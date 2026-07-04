@@ -48,9 +48,7 @@ function configure_zsh() {
     while IFS= read -r THEME || [[ -n "$THEME" ]]; do
         [ -z "$THEME" ] && continue     # skip empty lines
         for DIR in $(ls | grep -i "${THEME}"); do
-            copy_file "${DIR}" "${ZSH_THEMES_DST}"
-            status=$?
-            if [ $status -ne 0 ]; then
+            if ! copy_file "${DIR}" "${ZSH_THEMES_DST}"; then
                 return
             fi
         done
@@ -60,9 +58,7 @@ function configure_zsh() {
     while IFS= read -r PLUGIN || [[ -n "$PLUGIN" ]]; do
         [ -z "$PLUGIN" ] && continue     # skip empty lines
         for DIR in $(ls | grep -i "${PLUGIN}"); do
-            copy_file "${DIR}" "${ZSH_PLUGINS_DST}"
-            status=$?
-            if [ $status -ne 0 ]; then
+            if ! copy_file "${DIR}" "${ZSH_PLUGINS_DST}"; then
                 return
             fi
         done
@@ -73,15 +69,12 @@ function configure_zsh() {
     }
 
     # Relocate zsh config
-    copy_file "$ZSH_CONF_SRC" "$ZSH_CONF_DST"
-    status=$?
-    if [ $status -ne 0 ]; then
+    if ! copy_file "$ZSH_CONF_SRC" "$ZSH_CONF_DST"; then
         return
     fi
 
     # Relocate powerlevel10k config
-    copy_file "$P10K_CONF_SRC" "$P10K_CONF_DST"
-    if [ $? -ne 0 ]; then
+    if ! copy_file "$P10K_CONF_SRC" "$P10K_CONF_DST"; then
         return
     fi 
 

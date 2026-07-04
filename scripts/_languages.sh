@@ -53,8 +53,7 @@ function install_go() {
         return
     fi
 
-    _pull_go_binaries
-    if [ $? -ne 0 ]; then
+    if ! _pull_go_binaries; then
         error_message "Failed to pull golang bianary tarball"
         return
     fi
