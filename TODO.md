@@ -1,20 +1,15 @@
 ## Things to do
 
-### Helper functions
-- Functions to pull binaries
-- Functions to cleanup
-
-### Better cleanup
-- Remove tarballs and git repos after theyre used
-
-### Better recap
-- Binary versions
-
 ### Customization Program
-- Written in Rust
+- CLI Tool Written in Rust
 - Moves files around
 - Modifies plugins and themes
 - Pulls stuff from the web
+
+### Config File Linter
+- CLI Tool Written in Golang
+- Checks contents of files in ./configs
+- Highlights errors that'll cause issues in scripts
 
 ### Git Config
 - Delta (Side by side diffing)

@@ -153,7 +153,17 @@ function recap() {
     _recap_item "${item_labels[$i]}" "${status_vars[$i]}"
   done
 
+  if [[ "$KITTY_SUCCESS" == "true" ]]; then
+    message "Kitty Version" "$(kitty --version)"
+  fi
+
+  if [[ "$GOLANG_SUCCESS" == "true" ]]; then
+    message "Golang Version" "$(go version)"
+  fi
+
   if [[ "$RUST_SUCCESS" == "true" ]]; then
+    message "Rustup Version" "$(rustup --version)"
+    message "Cargo Version" "$(cargo --version)"
     message "Next Steps" "Execute 'source \"$HOME/.cargo/env\"'"
   fi
 
