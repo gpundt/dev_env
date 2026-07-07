@@ -11,3 +11,5 @@ fd
 wl-clipboard
 nodejs
 npm
+openssl
+pkgconf

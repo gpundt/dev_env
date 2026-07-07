@@ -3,3 +3,4 @@ fonts-powerline
 dconf-cli
 exa
 tmux
+libssl-dev
