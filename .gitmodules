@@ -1,0 +1,3 @@
+[submodule "pathfinder"]
+	path = tools/pathfinder
+	url = git@github.com:gpundt/pathfinder.git
