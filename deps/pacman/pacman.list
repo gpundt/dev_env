@@ -13,3 +13,6 @@ nodejs
 npm
 openssl
 pkgconf
+docker
+docker-compose
+docker-buildx

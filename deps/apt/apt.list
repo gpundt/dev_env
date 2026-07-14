@@ -4,3 +4,5 @@ dconf-cli
 exa
 tmux
 libssl-dev
+docker
+docker-compose
