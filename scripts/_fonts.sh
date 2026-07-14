@@ -50,6 +50,29 @@ function install_fonts() {
     FONTS_SUCCESS=true
 }
 
+function pull_fonts() {
+    start_step_message "Pulling Fonts"
+    while IFS= read -r FONT_URL || [[ -n "$FONT_URL" ]]; do
+        [ -z "$FONT_URL" ] && continue      # skip empty lines
+        start_step_message "${FONT_URL}" "substep"
+
+        FONT_NAME=$(basename "$FONT_URL" .zip)
+        OUTPUT_ZIP=../deps/fonts/${FONT_NAME}.zip
+
+        # Skip if this font is already installed (dir exists and has font files)
+        if [ -d "$FONT_DIR" ] && find "$OUTPUT_DIR" -type f \( -iname "*.ttf" -o -iname "*.otf" \) -print -quit | grep -q .; then
+            info_message "${FONT_NAME} already pulled... skipping"
+            continue
+        fi
+
+        if ! pull_font_url "$FONT_URL" "$OUTPUT_ZIP"; then
+            return
+        fi
+        
+    done < "${FONTS_LIST}"
+    successful
+}
+
 function pull_font_url() {
     local url=$1
     local tmp_zip=$2

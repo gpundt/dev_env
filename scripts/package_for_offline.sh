@@ -1,4 +1,5 @@
 #!/bin/bash
+source ./_fonts.sh
 source ./_helpers.sh
 source ./_packages.sh
 
@@ -11,5 +12,6 @@ function main() {
     
     pull_apt_deps
     pull_git_repos
+    pull_fonts
 }
 main
