@@ -13,5 +13,6 @@ function main() {
     pull_apt_deps
     pull_git_repos
     pull_fonts
+    pull_submodules
 }
 main
