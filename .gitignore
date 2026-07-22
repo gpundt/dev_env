@@ -6,3 +6,10 @@ deps/fonts/*
 
 deps/git/*
 !deps/git/git.list
+
+deps/kitty/*
+!deps/kitty/kitty.list
+
+deps/zsh/*
+!deps/kitty/plugins.list
+!deps/kitty/themes.list

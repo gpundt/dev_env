@@ -60,7 +60,7 @@ function pull_fonts() {
         OUTPUT_ZIP=../deps/fonts/${FONT_NAME}.zip
 
         # Skip if this font is already installed (dir exists and has font files)
-        if [ -d "$FONT_DIR" ] && find "$OUTPUT_DIR" -type f \( -iname "*.ttf" -o -iname "*.otf" \) -print -quit | grep -q .; then
+        if [ -f "$OUTPUT_ZIP" ]; then
             info_message "${FONT_NAME} already pulled... skipping"
             continue
         fi

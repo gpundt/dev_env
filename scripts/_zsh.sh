@@ -12,6 +12,8 @@ ZSH_PLUGINS_DST=$OHMYZSH_DIR/plugins/
 ZSH_THEMES_DST=$OHMYZSH_DIR/themes/
 P10K_CONF_SRC=$(pwd)/../configs/p10k.zsh
 P10K_CONF_DST=~/.p10k.zsh
+
+OHMYZSH_OFFLINE_PULL=$(pwd)/../deps/zsh/ohmyzsh.zip
 ZSH_SUCCESS=false
 
 # ──── Configures Zsh using config file, plugins, and themes ────────────────────────
@@ -81,4 +83,11 @@ function configure_zsh() {
 
     successful
     ZSH_SUCCESS=true
+}
+
+function pull_ohmyzsh() {
+    start_step_message "Pulling oh-my-zsh Locally"
+    if ! curl -L -o $OHMYZSH_OFFLINE_PULL "https://github.com/ohmyzsh/ohmyzsh/archive/refs/heads/master.zip"; then
+        error_message "Failed to pull ohmyzsh zip"
+    fi
 }

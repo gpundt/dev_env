@@ -11,6 +11,9 @@ TMUX_SUCCESS=false
 KITTY_DIR=~/.config/kitty
 KITTY_CONF_SRC=$(pwd)/../configs/kitty.conf
 KITTY_CONF_DST=$KITTY_DIR/kitty.conf
+
+KITTY_OFFLINE_PULL_DIR=$(pwd)/../deps/kitty
+KITTY_OFFLINE_PULL_LIST=$KITTY_OFFLINE_PULL_DIR/kitty.list
 KITTY_SUCCESS=false
 
 # ── Alacritty ──────────────
@@ -91,6 +94,34 @@ function configure_kitty() {
 
   successful
   KITTY_SUCCESS=true
+}
+
+function pull_kitty() {
+  start_step_message "Pulling Kitty Binary Bundles"
+  KITTY_X86_URL=$(cat "${KITTY_OFFLINE_PULL_LIST}" | grep "x86_64")
+  X86_OUTPUT_FILE="${KITTY_X86_URL##*/}"
+  KITTY_ARM_URL=$(cat "${KITTY_OFFLINE_PULL_LIST}" | grep "arm64")
+  ARM_OUTPUT_FILE="${KITTY_ARM_URL##*/}"
+
+  if [ ! -f "$KITTY_OFFLINE_PULL_DIR/$X86_OUTPUT_FILE" ]; then
+    start_step_message "${X86_OUTPUT_FILE}" "substep"
+    if ! curl -L -o $KITTY_OFFLINE_PULL_DIR/$X86_OUTPUT_FILE $KITTY_X86_URL; then
+      error_message "Failed to pull x86_64 bundle from ${KITTY_X86_URL}"
+    fi
+  else
+    info_message "Skipping '${KITTY_OFFLINE_PULL_DIR}/${X86_OUTPUT_FILE}' - already exists"
+  fi
+
+  if [ ! -f " $KITTY_OFFLINE_PULL_DIR/$ARM_OUTPUT_FILE $KITTY_ARM_URL" ]; then
+    start_step_message "${ARM_OUTPUT_FILE}" "substep"
+    if ! curl -L -o $KITTY_OFFLINE_PULL_DIR/$ARM_OUTPUT_FILE $KITTY_ARM_URL; then
+      error_message "Failed to pull x86_64 bundle from ${KITTY_ARM_URL}"
+    fi
+  else
+    info_message "Skipping '${KITTY_OFFLINE_PULL_DIR}/{$ARM_OUTPUT_FILE}' - already exists"
+  fi
+
+  successful
 }
 
 # ──── Configures Alacritty using config file ───────────────────────────────────────

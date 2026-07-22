@@ -3,6 +3,8 @@ source ./_fonts.sh
 source ./_git.sh
 source ./_helpers.sh
 source ./_packages.sh
+source ./_terminals.sh
+source ./_zsh.sh
 
 # ──── Script entrypoint ────────────────────────────────────────────────────────────
 function main() {
@@ -15,5 +17,7 @@ function main() {
     pull_git_repos
     pull_fonts
     pull_submodules
+    pull_ohmyzsh
+    pull_kitty
 }
 main
