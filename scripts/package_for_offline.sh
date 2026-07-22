@@ -1,5 +1,6 @@
 #!/bin/bash
 source ./_fonts.sh
+source ./_git.sh
 source ./_helpers.sh
 source ./_packages.sh
 
