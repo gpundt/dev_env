@@ -79,6 +79,18 @@ function copy_file() {
   return 0
 }
 
+function pull_from_url() {
+  local url=$1
+  local destination=$2
+
+  start_step_message "${url} -> ${destination}" "substep"
+  if ! curl -L -o "${destination}" "${url}"; then
+    return 1
+  fi
+
+  return 0
+}
+
 # ──── Help Message ───────────────────────────────────────────────────────────────
 function help_message() {
   local script_name="$1"

@@ -3,6 +3,7 @@ source ./_helpers.sh
 
 # ── Global Variables ────────────────────────────────────────────────────────────────
 FONTS_LIST=$(pwd)/../deps/fonts/fonts.list
+FONT_DST_DIR=~/.local/share/fonts/
 FONTS_SUCCESS=false
 
 
@@ -10,36 +11,34 @@ FONTS_SUCCESS=false
 function install_fonts() {
     start_step_message "Adding Fonts"
     mkdir -p ~/.local/share/fonts
-    while IFS= read -r FONT_URL || [[ -n "$FONT_URL" ]]; do
-        [ -z "$FONT_URL" ] && continue      # skip empty lines
-        start_step_message "${FONT_URL}" "substep"
 
-        FONT_NAME=$(basename "$FONT_URL" .zip)
-        FONT_DIR=~/.local/share/fonts/$FONT_NAME
-        TMP_ZIP=/tmp/${FONT_NAME}.zip
+    if [[ "$1" == "offline" ]]; then
+        info_message "Offline Install - Skipping pull..."
+    else 
+        if ! pull_fonts; then
+            return
+        fi
+    fi
 
+    for FONT_FILE in $(find ../deps/fonts -maxdepth 1 -name "*.zip" -type f); do
+        local file_name=$(basename "$FONT_FILE")
+        local font_name=$(basename "$FONT_FILE" .zip)
+
+        CURRENT_FONT_DST=$FONT_DST_DIR/$font_name
         # Skip if this font is already installed (dir exists and has font files)
-        if [ -d "$FONT_DIR" ] && find "$FONT_DIR" -type f \( -iname "*.ttf" -o -iname "*.otf" \) -print -quit | grep -q .; then
+        if [ -d "$CURRENT_FONT_DST" ] && find "$CURRENT_FONT_DST" -type f \( -iname "*.ttf" -o -iname "*.otf" \) -print -quit | grep -q .; then
             info_message "${FONT_NAME} already installed... skipping"
             continue
         fi
 
-        mkdir -p "$FONT_DIR"
-
-        if ! pull_font_url "$FONT_URL" "$TMP_ZIP"; then
+        mkdir -p "$CURRENT_FONT_DST"
+        if ! unzip -o "$FONT_FILE" -d "$CURRENT_FONT_DST" > /dev/null 2>&1; then
+            error_message "Failed to unzip '${FONT_FILE}'"
             return
         fi
 
-        if ! unzip -o "$TMP_ZIP" -d "$FONT_DIR" > /dev/null 2>&1; then
-            error_message "Failed to unzip '${TMP_ZIP}'"
-            rm -rf "$TMP_ZIP"
-            return
-        fi
-
-        rm -rf "$TMP_ZIP"
-        message "Installed Font" "${FONT_NAME}"
-        
-    done < "${FONTS_LIST}"
+        message "Installed Font" "${FONT_FILE}"
+    done
 
     if ! fc-cache -fv; then
         error_message "Failed to 'fc-cache -fv'"
@@ -54,7 +53,6 @@ function pull_fonts() {
     start_step_message "Pulling Fonts"
     while IFS= read -r FONT_URL || [[ -n "$FONT_URL" ]]; do
         [ -z "$FONT_URL" ] && continue      # skip empty lines
-        start_step_message "${FONT_URL}" "substep"
 
         FONT_NAME=$(basename "$FONT_URL" .zip)
         OUTPUT_ZIP=../deps/fonts/${FONT_NAME}.zip
@@ -65,22 +63,11 @@ function pull_fonts() {
             continue
         fi
 
-        if ! pull_font_url "$FONT_URL" "$OUTPUT_ZIP"; then
-            return
+        if ! pull_from_url "$FONT_URL" "$OUTPUT_ZIP"; then
+            error_message "Failed to pull font url: '${FONT_URL}'"
+            return 1
         fi
         
     done < "${FONTS_LIST}"
     successful
-}
-
-function pull_font_url() {
-    local url=$1
-    local tmp_zip=$2
-
-    if ! curl -Lo "$tmp_zip" "$url"; then
-        error_message "Failed to download '${url}'"
-        return 1
-    fi
-
-    return 0
 }

@@ -1,12 +1,17 @@
 #!/bin/bash
+source ./_fonts.sh
 source ./_helpers.sh
+source ./_languages.sh
+source ./_terminals.sh
+
 
 # ──── Script entrypoint ────────────────────────────────────────────────────────────
 function main() {
-    install_apt_deps "offline"
-
-    place_tmux_config
-    place_kitty_config
-    place_alacritty_config
+    install_fonts "offline"
+    # install_rust "offline"
+    # install_go "offline
+    configure_tmux "offline"
+    configure_kitty "offline"
+    configure_zsh "offline"
 }
 main

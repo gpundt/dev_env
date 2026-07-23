@@ -26,21 +26,26 @@ function configure_zsh() {
         return
     fi
 
-    local ohmyzsh_init
-    ohmyzsh_init=$(mktemp /tmp/ohmyzsh-install.XXXXXX.sh) || {
-        error_message "Failed to create temp file for Oh My Zsh installer"
-        return
-    }
-    trap 'rm -f "$ohmyzsh_init"' RETURN
+    if [[ "$1" == "offline" ]]; then
+        info_message "Offline Install - Skipping pull..."
     
-    if ! curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh -o "$ohmyzsh_init"; then
-        error_message "Failed to download Oh My Zsh install script"
-        return
-    fi
+    else
+        local ohmyzsh_init
+        ohmyzsh_init=$(mktemp /tmp/ohmyzsh-install.XXXXXX.sh) || {
+            error_message "Failed to create temp file for Oh My Zsh installer"
+            return
+        }
+        trap 'rm -f "$ohmyzsh_init"' RETURN
+        
+        if ! curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh -o "$ohmyzsh_init"; then
+            error_message "Failed to download Oh My Zsh install script"
+            return
+        fi
 
-    if ! /bin/sh "$ohmyzsh_init" --unattended; then
-        error_message "Failed to run ohmyzsh install script"
-        return
+        if ! /bin/sh "$ohmyzsh_init" --unattended; then
+            error_message "Failed to run ohmyzsh install script"
+            return
+        fi
     fi
 
     pushd "$GIT_REPOS_DIR" > /dev/null || {
@@ -85,9 +90,18 @@ function configure_zsh() {
     ZSH_SUCCESS=true
 }
 
-function pull_ohmyzsh() {
+function pull_ohmyzsh_offline() {
     start_step_message "Pulling oh-my-zsh Locally"
-    if ! curl -L -o $OHMYZSH_OFFLINE_PULL "https://github.com/ohmyzsh/ohmyzsh/archive/refs/heads/master.zip"; then
-        error_message "Failed to pull ohmyzsh zip"
+    if [ ! -f "$OHMYZSH_OFFLINE_PULL" ]; then
+        if ! curl -L -o $OHMYZSH_OFFLINE_PULL "https://github.com/ohmyzsh/ohmyzsh/archive/refs/heads/master.zip"; then
+            error_message "Failed to pull ohmyzsh zip"
+            return 1
+        fi
+    else
+        info_message "'$OHMYZSH_OFFLINE_PULL' Already Exists - Skipping pull..."
+        return
     fi
+
+    successful
+    return 0
 }

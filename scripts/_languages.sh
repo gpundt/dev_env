@@ -3,10 +3,13 @@ source ./_helpers.sh
 
 # ── Global Variables ────────────────────────────────────────────────────────────────
 # ── Rust ────────────────────
+RUST_VERSION="1.97.1"
+RUST_TARBALL_DST_DIR=$(pwd)/../deps/rust
 RUST_SUCCESS=false
 
 # ── Golang ──────────────────
 GOLANG_VERSION="1.26.0"
+GOLANG_TARBALL_DST_DIR=$(pwd)/../deps/golang
 GOLANG_SUCCESS=false
 
 
@@ -20,28 +23,38 @@ function install_rust() {
         return
     fi
 
-    local rustup_init
-    rustup_init=$(mktemp /tmp/rustup-init.XXXXXX.sh) || {
-        error_message "Failed to create temp file for rustup installer"
-        return
-    }
+    if [[ "$1" == "offline" ]]; then
+        if ! pull_rust_binary; then
+            return
+        fi
+    else
+        local rustup_init
+        rustup_init=$(mktemp /tmp/rustup-init.XXXXXX.sh) || {
+            error_message "Failed to create temp file for rustup installer"
+            return
+        }
 
-    trap 'rm -f "$rustup_init"' RETURN
+        trap 'rm -f "$rustup_init"' RETURN
 
-    start_step_message "Downloading rustup installer" "substep"
-    if ! curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs -o "$rustup_init"; then
-        error_message "Failed to download rustup installer"
-        return
-    fi
+        start_step_message "Downloading rustup installer" "substep"
+        if ! curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs -o "$rustup_init"; then
+            error_message "Failed to download rustup installer"
+            return
+        fi
 
-    start_step_message "Running rustup_init install script" "substep"
-    if ! /bin/sh "$rustup_init"; then
-        error_message "Failed to install Cargo and Rustup"
-        return
+        start_step_message "Running rustup_init install script" "substep"
+        if ! /bin/sh "$rustup_init"; then
+            error_message "Failed to install Cargo and Rustup"
+            return
+        fi
     fi
 
     successful
     RUST_SUCCESS=true
+}
+
+function pull_rust_binary() {
+    start_step_message "Pulling Binaries"
 }
 
 # ── Golang Installation ─────────────────────────────────────────────────────────────
@@ -54,9 +67,13 @@ function install_go() {
         return
     fi
 
-    if ! pull_go_binary; then
-        error_message "Failed to pull golang bianary tarball"
-        return
+    if [[ "$1" == "offline" ]]; then
+        info_message "Offline Install - Skipping pull...."
+    else
+        if ! pull_go_binary; then
+            error_message "Failed to pull golang bianary tarball"
+            return
+        fi
     fi
 
     sudo rm -rf /usr/local/go
@@ -83,13 +100,19 @@ function pull_go_binary() {
         armv7l)  GO_ARCH="armv6l" ;;
         *) error_message "Unsupported architecture: ${ARCH}" && return 1  ;;
     esac
-                
-    TARBALL="go${GOLANG_VERSION}.linux-${ARCH}.tar.gz"
-    URL="https://go.dev/dl/{TARBALL}"
 
-    start_step_message "${TARBALL}" "substep"
-    if ! wget -q --show-progress "$URL"; then
-        return 1
+    mkdir -p "${GOLANG_TARBALL_DST_DIR}"    
+    GOLANG_TARBALL="go${GOLANG_VERSION}.linux-${ARCH}.tar.gz"
+    DST_TARBALL="${GOLANG_TARBALL_DST_DIR}/${GOLANG_TARBALL}"
+    URL="https://go.dev/dl/${GOLANG_TARBALL}"
+
+    if [ ! -f "$DST_TABALL" ]; then
+        start_step_message "${TARBALL}" "substep"
+        if ! curl -L -o "$DST_TARBALL" "$URL"; then
+            return 1
+        fi
+    else
+        info_message "Golang Tarball Exists - Skipping pull..."
     fi
 
     return 0

@@ -26,17 +26,16 @@ ALACRITTY_SUCCESS=false
 function configure_tmux() {
   start_step_message "Configuring Tmux"
 
-  mkdir -p ~/.tmux/plugins/catppuccin
-  pushd "$GIT_REPOS_DIR/tmux" >/dev/null || {
-    error_message "Failed to 'pushd \"$GIT_REPOS_DIR/tmux\"'"
-    return
-  }
-  git checkout v2.3.0
-  popd >/dev/null || {
-    error_message "Failed to 'popd'"
-    return
-  }
+  if [[ "$1" == "offline" ]]; then
+    info_message "Offline Install - Skipping pull..."
+  else
+    if ! pull_tmux; then
+      error_message "Failed to pull correct Tmux package"
+      return
+    fi
+  fi
 
+  mkdir -p ~/.tmux/plugins/catppuccin
   if ! copy_file "$GIT_REPOS_DIR"/tmux ~/.tmux/plugins/catppuccin/tmux; then
     return
   fi
@@ -53,37 +52,48 @@ function configure_tmux() {
   TMUX_SUCCESS=true
 }
 
+function pull_tmux() {
+  start_step_message "Downloading Tmux"
+  pushd "$GIT_REPOS_DIR/tmux" >/dev/null || {
+    error_message "Failed to 'pushd \"$GIT_REPOS_DIR/tmux\"'"
+    return 1
+  }
+  git checkout v2.3.0
+  popd >/dev/null || {
+    error_message "Failed to 'popd'"
+    return 1
+  }
+
+  return 0
+}
+
 # ──── Configures Kitty using config file and plugins ───────────────────────────────
 function configure_kitty() {
   start_step_message "Configuring Kitty"
 
   if ! command -v kitty >/dev/null 2>&1; then
-
-    start_step_message "Pulling Installer" "substep"
-    kitty_installer=$(mktemp /tmp/kitty_installer.XXXXXX.sh) || {
-      error_message "Failed to create temp file for kitty installer"
-      return
-    }
-    trap 'rm -f "$kitty_installer"' RETURN
-    if ! curl https://sw.kovidgoyal.net/kitty/installer.sh -o "$kitty_installer"; then
-      error_message "Failed to pull kitty installer"
-      return
+    # If offline install, pull kitty binary bundles
+    if [[ "$1" == "offline" ]]; then
+      info_message "Offline Install - Skipping pull..."
+  
+    # If online install, download kitty via installer
+    else
+      if ! install_kitty; then
+        return
+      fi
     fi
-
-    start_step_message "Running Installer" "substep"
-    if ! /bin/sh "$kitty_installer"; then
-      error_message "Failed to run kitty installer"
-      return
-    fi
+  
   else
     info_message "Kitty exists... skipping installation"
   fi
 
-  mkdir -p $KITTY_DIR/themes
+  # Move kitty config
   if ! copy_file "$KITTY_CONF_SRC" "$KITTY_CONF_DST"; then
     return
   fi
 
+  # Move kitty themes
+  mkdir -p $KITTY_DIR/themes
   if ! cp "$GIT_REPOS_DIR"/kitty-themes/themes/* $KITTY_DIR/themes/; then
     return
   fi
@@ -96,7 +106,7 @@ function configure_kitty() {
   KITTY_SUCCESS=true
 }
 
-function pull_kitty() {
+function pull_kitty_offline() {
   start_step_message "Pulling Kitty Binary Bundles"
   KITTY_X86_URL=$(cat "${KITTY_OFFLINE_PULL_LIST}" | grep "x86_64")
   X86_OUTPUT_FILE="${KITTY_X86_URL##*/}"
@@ -107,21 +117,43 @@ function pull_kitty() {
     start_step_message "${X86_OUTPUT_FILE}" "substep"
     if ! curl -L -o $KITTY_OFFLINE_PULL_DIR/$X86_OUTPUT_FILE $KITTY_X86_URL; then
       error_message "Failed to pull x86_64 bundle from ${KITTY_X86_URL}"
+      return 1
     fi
   else
     info_message "Skipping '${KITTY_OFFLINE_PULL_DIR}/${X86_OUTPUT_FILE}' - already exists"
   fi
 
-  if [ ! -f " $KITTY_OFFLINE_PULL_DIR/$ARM_OUTPUT_FILE $KITTY_ARM_URL" ]; then
+  if [ ! -f "$KITTY_OFFLINE_PULL_DIR/$ARM_OUTPUT_FILE" ]; then
     start_step_message "${ARM_OUTPUT_FILE}" "substep"
     if ! curl -L -o $KITTY_OFFLINE_PULL_DIR/$ARM_OUTPUT_FILE $KITTY_ARM_URL; then
       error_message "Failed to pull x86_64 bundle from ${KITTY_ARM_URL}"
+      return 1
     fi
   else
     info_message "Skipping '${KITTY_OFFLINE_PULL_DIR}/{$ARM_OUTPUT_FILE}' - already exists"
   fi
 
   successful
+  return 0
+}
+
+function install_kitty() {
+  start_step_message "Pulling Installer" "substep"
+  kitty_installer=$(mktemp /tmp/kitty_installer.XXXXXX.sh) || {
+    error_message "Failed to create temp file for kitty installer"
+    return
+  }
+  trap 'rm -f "$kitty_installer"' RETURN
+  if ! curl https://sw.kovidgoyal.net/kitty/installer.sh -o "$kitty_installer"; then
+    error_message "Failed to pull kitty installer"
+    return
+  fi
+
+  start_step_message "Running Installer" "substep"
+  if ! /bin/sh "$kitty_installer"; then
+    error_message "Failed to run kitty installer"
+    return
+  fi
 }
 
 # ──── Configures Alacritty using config file ───────────────────────────────────────
