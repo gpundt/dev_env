@@ -181,5 +181,9 @@ function _install_kitty_online() {
     return 1
   fi
 
+  cp ~/.local/kitty.app/share/applications/kitty.desktop ~/.local/share/applications/
+  sed -i "s|Icon=kitty|Icon=$HOME/.local/kitty.app/share/icons/hicolor/256x256/apps/kitty.png|g" ~/.local/share/applications/kitty.desktop
+  sed -i "s|Exec=kitty|Exec=$HOME/.local/kitty.app/bin/kitty|g" ~/.local/share/applications/kitty.desktop
+
   return 0
 }
