@@ -20,11 +20,11 @@ function main() {
   determine_package_manager
   install_deps "${PACKAGE_MANAGER}" "${PACKAGE_INSTALL_COMMAND}"
   pull_git_repos
+  pull_tool_submodules
   install_fonts
 
   configure_tmux
   configure_kitty
-  configure_alacritty
   configure_zsh
 
   install_rust

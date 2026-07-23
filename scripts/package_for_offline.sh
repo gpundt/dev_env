@@ -16,12 +16,12 @@ function main() {
     
     
     pull_git_repos
-    pull_submodules
+    pull_tool_submodules
     pull_fonts
     #pull_rust_binary
     #pull_golang_binary
     pull_apt_deps
-    pull_tmux
+    pull_tmux_branch
     pull_kitty_offline
     pull_ohmyzsh_offline
 }

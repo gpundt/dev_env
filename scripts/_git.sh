@@ -6,7 +6,7 @@ GIT_REPOS_DIR=$(pwd)/../deps/git
 GIT_REPOS_LIST=$GIT_REPOS_DIR/git.list
 GIT_SUCCESS=false
 
-SUBMODULES_DIR=$(pwd)/../tools
+CUSTOM_TOOLS_DIR=$(pwd)/../tools
 
 
 # ── Git Repo Pull ───────────────────────────────────────────────────────────────────
@@ -44,8 +44,8 @@ function pull_git_repos() {
     GIT_SUCCESS=true
 }
 
-function pull_submodules() {
-    start_step_message "Pulling Git Submodules in '${SUBMODULES_DIR}'"
+function pull_tool_submodules() {
+    start_step_message "Pulling Git Submodules in '${CUSTOM_TOOLS_DIR}'"
     
     if ! git submodule update --init --recursive; then
         error_message "Failed to pull submodules with 'git submodule update --init --recrsive'"

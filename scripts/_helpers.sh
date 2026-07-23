@@ -85,6 +85,7 @@ function pull_from_url() {
 
   start_step_message "${url} -> ${destination}" "substep"
   if ! curl -L -o "${destination}" "${url}"; then
+    error_message "Failed to pull '${url}' to '${destination}'"
     return 1
   fi
 
@@ -140,7 +141,6 @@ function recap() {
   local -a item_labels=(
     "Tmux Configuration"
     "Kitty Configuration"
-    "Alacritty Configuration"
     "Zsh Configuration"
     "$package_label"
     "Git Repo Clones"
@@ -151,7 +151,6 @@ function recap() {
   local -a status_vars=(
     "$TMUX_SUCCESS"
     "$KITTY_SUCCESS"
-    "$ALACRITTY_SUCCESS"
     "$ZSH_SUCCESS"
     "$package_status"
     "$GIT_SUCCESS"

@@ -50,7 +50,7 @@ function install_fonts() {
 }
 
 function pull_fonts() {
-    start_step_message "Pulling Fonts"
+    start_step_message "Pulling Fonts Listed in '${FONTS_LIST}'"
     while IFS= read -r FONT_URL || [[ -n "$FONT_URL" ]]; do
         [ -z "$FONT_URL" ] && continue      # skip empty lines
 

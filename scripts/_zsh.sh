@@ -14,6 +14,8 @@ P10K_CONF_SRC=$(pwd)/../configs/p10k.zsh
 P10K_CONF_DST=~/.p10k.zsh
 
 OHMYZSH_OFFLINE_PULL=$(pwd)/../deps/zsh/ohmyzsh.zip
+GITSTATUSD_X86_OFFLINE_PULL=$(pwd)/../deps/zsh/gitstatusd-linux-x86_64.tar.gz 
+GITSTATUSD_ARM_OFFLINE_PULL=$(pwd)/../deps/zsh/gitstatusd-linux-aarch64.tar.gz
 ZSH_SUCCESS=false
 
 # ──── Configures Zsh using config file, plugins, and themes ────────────────────────
@@ -21,29 +23,13 @@ function configure_zsh() {
     start_step_message "Configuring Zsh"
     start_step_message "Oh My Zsh" "substep"
     if [ -d $OHMYZSH_DIR ]; then
-        info_message "Skipping; Oh-my-zsh already exists..."
-        ZSH_SUCCESS=true
-        return
-    fi
-
-    if [[ "$1" == "offline" ]]; then
-        info_message "Offline Install - Skipping pull..."
-    
-    else
-        local ohmyzsh_init
-        ohmyzsh_init=$(mktemp /tmp/ohmyzsh-install.XXXXXX.sh) || {
-            error_message "Failed to create temp file for Oh My Zsh installer"
-            return
-        }
-        trap 'rm -f "$ohmyzsh_init"' RETURN
-        
-        if ! curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh -o "$ohmyzsh_init"; then
-            error_message "Failed to download Oh My Zsh install script"
+        info_message "${OHMYZSH_DIR} Exists; skipping pull..."
+    elif [[ "$1" == "offline" ]]; then
+        if ! _install_ohmyzsh_offline; then
             return
         fi
-
-        if ! /bin/sh "$ohmyzsh_init" --unattended; then
-            error_message "Failed to run ohmyzsh install script"
+    else
+        if ! _install_ohmyzsh_online; then
             return
         fi
     fi
@@ -92,16 +78,82 @@ function configure_zsh() {
 
 function pull_ohmyzsh_offline() {
     start_step_message "Pulling oh-my-zsh Locally"
+    # Pull oh-my-zsh master zip
     if [ ! -f "$OHMYZSH_OFFLINE_PULL" ]; then
-        if ! curl -L -o $OHMYZSH_OFFLINE_PULL "https://github.com/ohmyzsh/ohmyzsh/archive/refs/heads/master.zip"; then
-            error_message "Failed to pull ohmyzsh zip"
+        if ! pull_from_url "https://github.com/ohmyzsh/ohmyzsh/archive/refs/heads/master.zip" "$OHMYZSH_OFFLINE_PULL"; then
             return 1
         fi
     else
-        info_message "'$OHMYZSH_OFFLINE_PULL' Already Exists - Skipping pull..."
-        return
+        info_message "'$OHMYZSH_OFFLINE_PULL' Already Exists; Skipping pull..."
+    fi
+
+    # Pull x86_64 gitstatusd binary
+    if [ ! -f "$GITSTATUSD_X86_OFFLINE_PULL" ]; then
+        if ! pull_from_url "https://github.com/romkatv/gitstatus/releases/download/v1.5.4/gitstatusd-linux-x86_64.tar.gz" "$GITSTATUSD_X86_OFFLINE_PULL"; then
+            return 1
+        fi
+    else
+        info_message "'$GITSTATUSD_X86_OFFLINE_PULL' Already Exists; Skipping pull..."
+    fi
+
+    # Pull aarch64 gitstatusd binary
+    if [ ! -f "$GITSTATUSD_ARM_OFFLINE_PULL" ]; then
+        if ! pull_from_url "https://github.com/romkatv/gitstatus/releases/download/v1.5.4/gitstatusd-linux-aarch64.tar.gz" "$GITSTATUSD_ARM_OFFLINE_PULL"; then
+            return 1
+        fi
+    else
+        info_message "'$GITSTATUSD_ARM_OFFLINE_PULL' Already Exists; Skipping pull..."
+    fi
+    successful
+}
+
+function _install_ohmyzsh_offline() {
+    start_step_message "Installing OhMyZsh" "substep"
+    
+    # Unzip oh-my-zsh master zip to destination
+    mkdir -p ~/.oh-my-zsh
+    if ! unzip "$OHMYZSH_OFFLINE_PULL" -d ~/.oh-my-zsh/; then
+        error_message "Failed to unzip '${OHMYZSH_OFFLINE_PULL}'"
+        return 1
+    fi
+
+    if ! mv ~/.oh-my-zsh/ohmyzsh-master/* ~/.oh-my-zsh/; then
+        error_message "Failed to move contents of '~/.oh-my-zsh/ohmyzsh-master/' to '~/.oh-my-zsh/'"
+        return 1
+    fi
+
+    ARCH=$(uname -m)
+    case "$ARCH" in
+        x86_64)  GITSTATUSD_TARBALL=$GITSTATUSD_X86_OFFLINE_PULL ;;
+        aarch64) GITSTATUSD_TARBALL=$GITSTATUSD_ARM_OFFLINE_PULL ;;
+        *) error_message "Unsupported architecture: ${ARCH}" && return 1  ;;
+    esac
+
+    # Move correct gitstatusd binary
+    mkdir -p ~/.cache/gitstatus
+    if ! tar -xvzf $GITSTATUSD_TARBALL -C ~/.cache/gitstatus/; then
+        error_message "Failed to extract '${GITSTATUSD_TARBALL}' to '~/.cache/gitstatus/'"
+        return 1
     fi
 
     successful
     return 0
+}
+
+function _install_ohmyzsh_online() {
+    # Install oh-my-zsh via installer script
+    ohmyzsh_init=$(mktemp /tmp/ohmyzsh-install.XXXXXX.sh) || {
+        error_message "Failed to create temp file for Oh My Zsh installer"
+        return 1
+    }
+    trap 'rm -f "$ohmyzsh_init"' RETURN
+
+    if ! pull_from_url "https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh" "$ohmyzsh_init"; then
+        return 1
+    fi
+
+    if ! /bin/sh "$ohmyzsh_init" --unattended; then
+        error_message "Failed to run ohmyzsh install script"
+        return 1
+    fi
 }
