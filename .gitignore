@@ -11,5 +11,5 @@ deps/kitty/*
 !deps/kitty/kitty.list
 
 deps/zsh/*
-!deps/kitty/plugins.list
-!deps/kitty/themes.list
+!deps/zsh/plugins.list
+!deps/zsh/themes.list
